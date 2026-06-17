@@ -1,0 +1,26 @@
+{
+  "name": "Admin - ລະບົບຈັດສົ່ງບັດ",
+  "short_name": "Admin ຈັດສົ່ງບັດ",
+  "description": "Admin Dashboard ລະບົບຈັດສົ່ງບັດ ປກສ ເຊບັ້ງໄຟ",
+  "start_url": "https://soneaksone8-droid.github.io/Card-system-v2/admin.html",
+  "scope": "https://soneaksone8-droid.github.io/Card-system-v2/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#c8102e",
+  "theme_color": "#c8102e",
+  "lang": "lo",
+  "icons": [
+    {
+      "src": "https://soneaksone8-droid.github.io/Card-system-v2/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://soneaksone8-droid.github.io/Card-system-v2/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

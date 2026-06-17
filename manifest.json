@@ -1,0 +1,32 @@
+{
+  "name": "ລະບົບຈັດສົ່ງບັດ - ປກສ ເຊບັ້ງໄຟ",
+  "short_name": "ຈັດສົ່ງບັດ",
+  "description": "ລະບົບຈັດສົ່ງບັດປະຈຳຕົວດີຈິຕ້ອນ ປກສ ເມືອງເຊບັ້ງໄຟ",
+  "start_url": "https://soneaksone8-droid.github.io/Card-system-v2/staff.html",
+  "scope": "https://soneaksone8-droid.github.io/Card-system-v2/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#003087",
+  "theme_color": "#003087",
+  "lang": "lo",
+  "icons": [
+    {
+      "src": "https://soneaksone8-droid.github.io/Card-system-v2/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://soneaksone8-droid.github.io/Card-system-v2/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "ຈັດສົ່ງບັດ",
+      "url": "https://soneaksone8-droid.github.io/Card-system-v2/staff.html"
+    }
+  ]
+}
