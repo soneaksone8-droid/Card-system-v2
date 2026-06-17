@@ -624,6 +624,7 @@ function scanLoop() {
     if (typeof jsQR !== 'undefined') {
       const code=jsQR(img.data,img.width,img.height,{inversionAttempts:'attemptBoth'});
       if (code && code.data) {
+        console.log('QR Scan found:', code.data);
         const parsed = parseQR(code.data);
         if (parsed) {
           stopQR();
@@ -631,8 +632,16 @@ function scanLoop() {
           if (navigator.vibrate) navigator.vibrate([100,50,100]);
           searchCard(parsed.fn, parsed.ln, parsed.dob);
           return;
+        } else {
+          stopQR();
+          alert('❌ ອ່ານ QR ໄດ້ແຕ່ Format ຕ່າງ\nສົ່ງໃຫ້ຜູ້ດູແລ:\n' + code.data.substring(0,120));
+          return;
         }
       }
+    } else {
+      stopQR();
+      alert('❌ jsQR.js ຍັງບໍ່ໄດ້ Upload\nກະລຸນາ Upload jsQR.js ໃສ່ GitHub');
+      return;
     }
   }
   requestAnimationFrame(scanLoop);
@@ -660,7 +669,8 @@ function readQRFile(e) {
           }
         }
       }
-      alert('❌ ອ່ານ QR ບໍ່ໄດ້ ລອງໃໝ່');
+      console.log('QR parse failed. Raw:', code?.data || 'no data');
+      alert('❌ ອ່ານ QR ບໍ່ໄດ້ ລອງໃໝ່\n(ໃຊ້ F12 Console ເບີ່ງຂໍ້ມູນ QR)');
     };
     img.src = ev.target.result;
   };
@@ -670,16 +680,78 @@ function readQRFile(e) {
 
 function parseQR(raw) {
   if (!raw) return null;
-  const parts = raw.split('|');
-  if (parts.length < 3) return null;
-  // Format: ID|ຊື່ ນາມ|DDMMYYYY|...
-  const namePart = parts[1] ? parts[1].trim() : '';
-  const dobPart = parts[2] ? parts[2].trim() : '';
-  const nameSplit = namePart.split(' ');
-  const fn = normalize(nameSplit[0] || '');
-  const ln = normalize(nameSplit.slice(1).join(' ') || '');
-  if (!fn) return null;
-  return {fn, ln, dob: dobPart};
+  console.log('QR RAW:', raw); // Debug - ເບິ່ງໃນ F12 Console
+
+  // Try format 1: ID|ຊື່ ນາມ|DDMMYYYY (pipe separated)
+  if (raw.includes('|')) {
+    const parts = raw.split('|');
+    const namePart = (parts[1] || '').trim();
+    const dobPart = (parts[2] || '').trim();
+    if (namePart) {
+      const sp = namePart.split(' ');
+      const fn = normalize(sp[0] || '');
+      const ln = normalize(sp.slice(1).join(' ') || '');
+      if (fn) return {fn, ln, dob: dobPart};
+    }
+  }
+
+  // Try format 2: semicolon separated
+  if (raw.includes(';')) {
+    const parts = raw.split(';');
+    for (let i = 0; i < parts.length; i++) {
+      const p = parts[i].trim();
+      if (p && /[຀-໿]/.test(p)) { // Lao text
+        const sp = p.split(' ');
+        const fn = normalize(sp[0] || '');
+        const ln = normalize(sp.slice(1).join(' ') || '');
+        const dob = parts[i+1] ? parts[i+1].trim() : '';
+        if (fn) return {fn, ln, dob};
+      }
+    }
+  }
+
+  // Try format 3: newline separated
+  if (raw.includes('\n')) {
+    const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+    for (let i = 0; i < lines.length; i++) {
+      if (/[຀-໿]/.test(lines[i])) {
+        const sp = lines[i].split(' ');
+        const fn = normalize(sp[0] || '');
+        const ln = normalize(sp.slice(1).join(' ') || '');
+        const dob = lines[i+1] || '';
+        if (fn) return {fn, ln, dob};
+      }
+    }
+  }
+
+  // Try format 4: comma separated
+  if (raw.includes(',')) {
+    const parts = raw.split(',');
+    for (let i = 0; i < parts.length; i++) {
+      const p = parts[i].trim();
+      if (/[຀-໿]/.test(p)) {
+        const sp = p.split(' ');
+        const fn = normalize(sp[0] || '');
+        const ln = normalize(sp.slice(1).join(' ') || '');
+        const dob = parts[i+1] ? parts[i+1].trim() : '';
+        if (fn) return {fn, ln, dob};
+      }
+    }
+  }
+
+  // ບໍ່ຕົງ format ໃດ → ລອງດຶງຊື່ Lao ໂດຍກົງ
+  const laoMatch = raw.match(/[຀-໿\s]+/g);
+  if (laoMatch) {
+    const namePart = laoMatch.find(m => m.trim().split(' ').length >= 2);
+    if (namePart) {
+      const sp = namePart.trim().split(' ');
+      const fn = normalize(sp[0]);
+      const ln = normalize(sp.slice(1).join(' '));
+      if (fn) return {fn, ln, dob: ''};
+    }
+  }
+
+  return null;
 }
 
 // ====== RECIPIENT ======
