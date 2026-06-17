@@ -1039,24 +1039,71 @@ function playSuccessSound() {
 function shortDate(d) {
   if (!d) return '-';
   d = d.toString().trim();
+
+  // Handle JS Date object string e.g. "Wed Jun 17 2026 00:00:00 GMT+0700..."
+  if (d.includes('GMT') || d.includes('UTC') || d.length > 20) {
+    try {
+      const dt = new Date(d);
+      if (!isNaN(dt)) {
+        const dd = String(dt.getDate()).padStart(2,'0');
+        const mm = String(dt.getMonth()+1).padStart(2,'0');
+        const yy = String(dt.getFullYear()).slice(-2);
+        return dd+'/'+mm+'/'+yy;
+      }
+    } catch(e) {}
+  }
+
+  // Handle gviz Date(2026,5,17) format
+  const gm = d.match(/Date\((\d+),(\d+),(\d+)/);
+  if (gm) {
+    const dd = String(gm[3]).padStart(2,'0');
+    const mm = String(Number(gm[2])+1).padStart(2,'0');
+    const yy = String(gm[1]).slice(-2);
+    return dd+'/'+mm+'/'+yy;
+  }
+
   // DD/MM/YYYY → DD/MM/YY
-  const m = d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (m) return m[1].padStart(2,'0')+'/'+m[2].padStart(2,'0')+'/'+m[3].slice(-2);
+  const m1 = d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m1) return m1[1].padStart(2,'0')+'/'+m1[2].padStart(2,'0')+'/'+m1[3].slice(-2);
+
   // Already DD/MM/YY
   const m2 = d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
   if (m2) return d;
+
+  // YYYY-MM-DD
+  const m3 = d.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m3) return m3[3]+'/'+m3[2]+'/'+m3[1].slice(-2);
+
   return d;
 }
 
 function shortTime(t) {
   if (!t) return '';
   t = t.toString().trim();
+
+  // Handle JS Date string "Sat Dec 30 1899 20:23:00 GMT+0642..."
+  if (t.includes('GMT') || t.includes('UTC') || t.length > 15) {
+    try {
+      const dt = new Date(t);
+      if (!isNaN(dt)) {
+        const hh = String(dt.getHours()).padStart(2,'0');
+        const mn = String(dt.getMinutes()).padStart(2,'0');
+        return hh+':'+mn;
+      }
+    } catch(e) {}
+    // Regex extract HH:MM from long string
+    const rm = t.match(/(\d{2}:\d{2}):\d{2}/);
+    if (rm) return rm[1];
+  }
+
   // HH:MM:SS → HH:MM
   const m = t.match(/^(\d{1,2}:\d{2})/);
   if (m) return m[1].padStart(5,'0');
-  // Google Sheets Date object value
+
+  // gviz Date(y,m,d,h,min)
   const dm = t.match(/Date\(\d+,\d+,\d+,(\d+),(\d+)/);
   if (dm) return dm[1].padStart(2,'0')+':'+dm[2].padStart(2,'0');
+
   return t;
 }
 
