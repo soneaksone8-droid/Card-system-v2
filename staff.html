@@ -444,7 +444,11 @@ async function loadAllData() {
     const res = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getCards', token:userToken})});
     const data = await res.json();
     if (data.status==='ok') {
-      allCards = data.data || [];
+      allCards = (data.data || []).map(c => ({
+        ...c,
+        date: shortDate(c.date),
+        dob: c.dob || '',
+      }));
       allPending = allCards.filter(c => c.status && c.status.includes('ພີມບັດສຳເລັດ'));
       allProblems = allCards.filter(c => c.status && c.status.includes('ບັດມີບັນຫາ'));
     }
@@ -460,7 +464,11 @@ async function loadHistory() {
     const res = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getDeliveries', token:userToken})});
     const data = await res.json();
     if (data.status==='ok') {
-      allHistory = (data.data || []).reverse();
+      allHistory = (data.data || []).map(h => ({
+        ...h,
+        date: shortDate(h.date),
+        time: shortTime(h.time),
+      })).reverse();
       filterHistory();
     }
   } catch(e) { el.innerHTML = '<div style="text-align:center;color:var(--danger);font-size:13px;padding:16px;">ເກີດຂໍ້ຜິດພາດ</div>'; }
@@ -471,14 +479,16 @@ async function loadTotalDelivered() {
     const res = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getDeliveries', token:userToken})});
     const data = await res.json();
     if (data.status==='ok') {
-      const rows = data.data || [];
+      const rows = (data.data || []).map(r => ({...r, date: shortDate(r.date)}));
       document.getElementById('totalCount').textContent = rows.length.toLocaleString();
       const now = new Date();
       const today = rows.filter(r => {
         if (!r.date) return false;
         const p = r.date.split('/');
         if (p.length===3) {
-          return Number(p[0])===now.getDate() && Number(p[1])===now.getMonth()+1 && Number(p[2])===now.getFullYear();
+          return Number(p[0])===now.getDate() &&
+                 Number(p[1])===now.getMonth()+1 &&
+                 (Number(p[2])===now.getFullYear() || Number(p[2])===Number(String(now.getFullYear()).slice(-2)));
         }
         return false;
       });
