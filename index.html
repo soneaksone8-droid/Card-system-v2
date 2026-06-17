@@ -73,7 +73,7 @@ body{font-family:'Noto Sans Lao',sans-serif;background:linear-gradient(160deg,#0
 <div class="main">
   <div class="notice">
     <div style="font-size:16px;flex-shrink:0;margin-top:1px;">⚠️</div>
-    <p>ກວດສອບໄດ້ສະເພາະບຸກຄົນທີ່ດຳເນີນການຢູ່ <strong>ປກສ ເມືອງເຊບັ້ງໄຟ</strong> ເທົ່ານັ້ນ.</p>
+    <p>ກວດໄດ້ສະເພາະບຸກຄົນທີ່ມາເຮັດບັດຢູ່ <strong>ປກສ ເມືອງເຊບັ້ງໄຟ</strong> ເທົ່ານັ້ນ. ບຸກຄົນທີ່ເຮັດຢູ່ເມືອງອື່ນ ຫຼື ແຂວງອື່ນ ບໍ່ສາມາດກວດສອບໄດ້.</p>
   </div>
 
   <div class="card">
@@ -221,7 +221,7 @@ function showResult(found, fn, ln, errMsg) {
       note='ບັດຂອງທ່ານໄດ້ຮັບການຈັດສົ່ງສຳເລັດແລ້ວ';
     } else if (found.status.includes('ພີມບັດສຳເລັດ')) {
       type='success'; icon='✅'; status='ບັດພ້ອມ! ເຂົ້າຮັບໄດ້ເລີຍ';
-      note='📍 ກະລຸນານຳເອກະສານຢືນຢັນຕົວຕົນ · ໜ່ວຍງານບັດ ຫ້ອງ 1';
+      note='📍 ກະລຸນາຖືເອກະສານຢັ້ງຢືນຕົວຕົນ ຫຼື ໃບນັດ ຮັບບັດຢູ່ຫ້ອງເບີ 01';
     } else if (found.status.includes('ບັດມີບັນຫາ')) {
       type='error'; icon='❌'; status='ບັດມີບັນຫາ';
       note='ກະລຸນາຕິດຕໍ່ ປກສ ເຊບັ້ງໄຟ ໂດຍກົງ';
