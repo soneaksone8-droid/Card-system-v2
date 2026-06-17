@@ -111,6 +111,29 @@ canvas{display:none;}
 .filter-btn{flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;border:2px solid;}
 /* SAVING */
 .saving{position:fixed;bottom:20px;right:20px;background:var(--primary);color:white;padding:10px 16px;border-radius:10px;font-size:12px;font-weight:600;display:none;z-index:200;}
+/* SEARCH METHODS */
+.search-methods{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.method-btn{border:none;border-radius:14px;padding:12px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all 0.2s;font-family:inherit;}
+.method-btn:active{transform:scale(0.95);}
+.method-icon{font-size:22px;line-height:1;}
+.method-label{font-size:11px;font-weight:700;line-height:1;}
+.method-type{background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;color:#1d4ed8;}
+.method-scan{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;color:#15803d;}
+.method-photo{background:linear-gradient(135deg,#fff7ed,#fed7aa);border:1.5px solid #fdba74;color:#c2410c;}
+.method-gallery{background:linear-gradient(135deg,#fdf4ff,#f3e8ff);border:1.5px solid #d8b4fe;color:#7c3aed;}
+/* CAMERA SCAN */
+.cam-wrapper{position:relative;background:#000;overflow:hidden;}
+.cam-wrapper video{width:100%;display:block;max-height:280px;object-fit:cover;}
+.cam-wrapper canvas{display:none;}
+.scan-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.scan-corner{position:absolute;width:28px;height:28px;border-color:#FFD700;border-style:solid;}
+.scan-corner.tl{top:20%;left:10%;border-width:3px 0 0 3px;border-radius:4px 0 0 0;}
+.scan-corner.tr{top:20%;right:10%;border-width:3px 3px 0 0;border-radius:0 4px 0 0;}
+.scan-corner.bl{bottom:20%;left:10%;border-width:0 0 3px 3px;border-radius:0 0 0 4px;}
+.scan-corner.br{bottom:20%;right:10%;border-width:0 3px 3px 0;border-radius:0 0 4px 0;}
+.scan-line{position:absolute;left:10%;right:10%;height:2px;background:linear-gradient(90deg,transparent,#FFD700,transparent);box-shadow:0 0 8px #FFD700;animation:scanMove 1.8s ease-in-out infinite;top:20%;}
+@keyframes scanMove{0%{top:20%;}50%{top:78%;}100%{top:20%;}}
+.scan-label{position:absolute;bottom:8px;left:0;right:0;text-align:center;color:rgba(255,255,255,0.9);font-size:11px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,0.8);}
 /* POPUP */
 .popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
 .popup-overlay.show{display:flex;}
@@ -192,13 +215,23 @@ canvas{display:none;}
     <div class="tab-panel active" id="tab-scan">
       <div class="card">
         <div class="card-title">🔍 ຄົ້ນຫາບຸກຄົນ</div>
-        <div style="display:flex;gap:8px;margin-bottom:10px;">
-          <button class="btn-secondary" onclick="showManual()">⌨️ ພິມຊື່</button>
-          <button class="btn-secondary" onclick="startQR()">📷 ສະແກນ QR</button>
-        </div>
-        <div style="display:flex;gap:8px;margin-bottom:10px;">
-          <button class="btn-secondary" onclick="document.getElementById('qrCapture').click()">📸 ຖ່າຍຮູບ</button>
-          <button class="btn-secondary" onclick="document.getElementById('qrGallery').click()">🖼️ ຈາກຄັງ</button>
+        <div class="search-methods">
+          <button class="method-btn method-type" onclick="showManual()">
+            <div class="method-icon">⌨️</div>
+            <div class="method-label">ພິມຊື່</div>
+          </button>
+          <button class="method-btn method-scan" onclick="startQR()">
+            <div class="method-icon">📷</div>
+            <div class="method-label">ສະແກນ QR</div>
+          </button>
+          <button class="method-btn method-photo" onclick="document.getElementById('qrCapture').click()">
+            <div class="method-icon">📸</div>
+            <div class="method-label">ຖ່າຍຮູບ</div>
+          </button>
+          <button class="method-btn method-gallery" onclick="document.getElementById('qrGallery').click()">
+            <div class="method-icon">🖼️</div>
+            <div class="method-label">ຈາກຄັງ</div>
+          </button>
         </div>
         <input type="file" id="qrCapture" accept="image/*" capture="environment" style="display:none" onchange="readQRFile(event)">
         <input type="file" id="qrGallery" accept="image/*" style="display:none" onchange="readQRFile(event)">
@@ -212,9 +245,19 @@ canvas{display:none;}
 
         <!-- Camera -->
         <div class="camera-box" id="cameraBox">
-          <video id="camVideo" playsinline autoplay muted></video>
-          <canvas id="camCanvas"></canvas>
-          <button onclick="stopQR()" style="width:100%;padding:10px;background:#dc2626;color:white;border:none;font-size:13px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;">⏹️ ປິດກ້ອງ</button>
+          <div class="cam-wrapper">
+            <video id="camVideo" playsinline autoplay muted></video>
+            <canvas id="camCanvas"></canvas>
+            <div class="scan-overlay">
+              <div class="scan-corner tl"></div>
+              <div class="scan-corner tr"></div>
+              <div class="scan-corner bl"></div>
+              <div class="scan-corner br"></div>
+              <div class="scan-line"></div>
+            </div>
+            <div class="scan-label">🔍 ຈ່ໍ QR Code ໃສ່ກອບ</div>
+          </div>
+          <button onclick="stopQR()" style="width:100%;padding:11px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;border:none;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:0.5px;">⏹️ ປິດກ້ອງ</button>
         </div>
 
         <!-- Found Card -->
@@ -472,7 +515,7 @@ function filterHistory() {
   const el = document.getElementById('historyList');
   if (!data.length) { el.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">ບໍ່ພົບຂໍ້ມູນ</div>'; return; }
   el.innerHTML = data.slice(0,100).map(h =>
-    '<div class="history-item"><div class="history-name">'+h.firstName+' '+h.lastName+'<\/div><div class="history-meta">📅 '+h.date+' '+h.time+'<br>👷 '+(h.staff||'-')+' · 👤 '+(h.recipient||'-')+(h.proxy?' ('+h.proxy+')':'')+' <\/div><\/div>'
+    '<div class="history-item"><div class="history-name">'+h.firstName+' '+h.lastName+'<\/div><div class="history-meta">📅 '+shortDate(h.date)+' '+shortTime(h.time)+'<br>👷 '+(h.staff||'-')+' · 👤 '+(h.recipient||'-')+(h.proxy?' ('+h.proxy+')':'')+' <\/div><\/div>'
   ).join('');
 }
 
@@ -772,7 +815,8 @@ async function confirmDelivery() {
   const day = String(now.getDate()).padStart(2,'0');
   const mo = String(now.getMonth()+1).padStart(2,'0');
   const yr = now.getFullYear();
-  const dateStr = day+'/'+mo+'/'+yr;
+  const dateStr = day+'/'+mo+'/'+yr; // Full for Sheets
+  const dateStrShort = day+'/'+mo+'/'+String(yr).slice(-2); // Short for display
   const h = String(now.getHours()).padStart(2,'0');
   const mn = String(now.getMinutes()).padStart(2,'0');
   const timeStr = h+':'+mn;
@@ -810,7 +854,7 @@ async function confirmDelivery() {
 
   playSuccessSound();
   if (navigator.vibrate) navigator.vibrate([100,50,200]);
-  showPopup('✅','ຈັດສົ່ງສຳເລັດ!',foundData.firstName+' '+foundData.lastName+'\n📅 '+dateStr+' '+timeStr+'\n👤 '+(recipientType==='self'?'ຮັບດ້ວຍຕົນເອງ':proxy),'success');
+  showPopup('✅','ຈັດສົ່ງສຳເລັດ!',foundData.firstName+' '+foundData.lastName+'\n📅 '+shortDate(dateStr)+' '+timeStr+'\n👤 '+(recipientType==='self'?'ຮັບດ້ວຍຕົນເອງ':proxy),'success');
 
   document.getElementById('foundCard').classList.remove('show');
   document.getElementById('deliveryForm').classList.remove('show');
@@ -899,7 +943,7 @@ function renderOverdue(){
       '<div style="display:flex;justify-content:space-between;align-items:center;">'+
       '<span style="font-size:13px;font-weight:700;color:#1f2937;">'+ic+' '+c.firstName+' '+c.lastName+'<\/span>'+
       '<span style="background:'+bg+';color:'+col+';border-radius:8px;padding:3px 9px;font-size:11px;font-weight:800;">'+c.days+' ວັນ<\/span><\/div>'+
-      '<div style="font-size:11px;color:var(--gray);margin-top:3px;">📅 '+(c.date||'-')+'<\/div><\/div>';
+      '<div style="font-size:11px;color:var(--gray);margin-top:3px;">📅 '+shortDate(c.date||'')+' <\/div><\/div>';
   }).join('');
 }
 
@@ -970,6 +1014,27 @@ function playSuccessSound() {
       o.start(ctx.currentTime+d);o.stop(ctx.currentTime+d+0.25);
     });
   }catch(e){}
+}
+
+// ====== DATE FORMAT ======
+function shortDate(d) {
+  if (!d) return '-';
+  d = d.toString().trim();
+  // DD/MM/YYYY → DD/MM/YY
+  const m = d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) return m[1].padStart(2,'0')+'/'+m[2].padStart(2,'0')+'/'+m[3].slice(-2);
+  // Already DD/MM/YY
+  const m2 = d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
+  if (m2) return d;
+  return d;
+}
+
+function shortTime(t) {
+  if (!t) return '';
+  t = t.toString().trim();
+  // HH:MM:SS → HH:MM
+  const m = t.match(/^(\d{2}:\d{2})/);
+  return m ? m[1] : t;
 }
 
 // ====== NORMALIZE ======
