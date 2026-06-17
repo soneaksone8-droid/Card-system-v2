@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ລະບົບພະນັກງານ - ປກສ ເຊບັ້ງໄຟ</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#003087">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ຈັດສົ່ງບັດ">
+<link rel="apple-touch-icon" href="logo.png">
+<script src="jsQR.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#003087;--gold:#FFD700;--white:#fff;--gray:#6b7280;--success:#059669;--warning:#d97706;--danger:#dc2626;--light:#f0f4ff;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans Lao',sans-serif;background:var(--light);min-height:100vh;}
+/* LOGIN */
+.login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#001f5e,#003087,#c8102e);padding:20px;}
+.login-box{background:white;border-radius:24px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+.login-logo{width:80px;height:80px;border-radius:50%;border:3px solid var(--gold);margin:0 auto 16px;display:block;overflow:hidden;background:white;}
+.login-logo img{width:100%;height:100%;object-fit:cover;}
+.login-title{text-align:center;font-size:20px;font-weight:800;color:var(--primary);margin-bottom:4px;}
+.login-sub{text-align:center;font-size:12px;color:var(--gray);margin-bottom:24px;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:12px;font-weight:700;color:var(--primary);margin-bottom:5px;}
+.form-group input{width:100%;padding:12px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:'Noto Sans Lao',sans-serif;transition:all 0.2s;}
+.form-group input:focus{outline:none;border-color:var(--primary);}
+.btn-login{width:100%;padding:13px;background:linear-gradient(135deg,#003087,#0052cc);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;margin-top:4px;}
+.login-err{color:var(--danger);font-size:12px;text-align:center;margin-top:8px;display:none;}
+/* APP */
+.app-page{display:none;flex-direction:column;min-height:100vh;}
+/* TOPBAR */
+.topbar{background:linear-gradient(135deg,#003087,#0052cc);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--gold);}
+.topbar-left{display:flex;align-items:center;gap:10px;}
+.topbar-logo{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--gold);overflow:hidden;background:white;flex-shrink:0;}
+.topbar-logo img{width:100%;height:100%;object-fit:cover;}
+.topbar-info h2{color:white;font-size:13px;font-weight:700;}
+.topbar-info p{color:rgba(255,255,255,0.75);font-size:10px;}
+.btn-logout{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;}
+/* COUNTER BAR */
+.counter-bar{background:linear-gradient(135deg,#002060,#003087);padding:8px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,215,0,0.3);}
+.counter-today{display:flex;align-items:center;gap:10px;}
+.counter-num{font-size:26px;font-weight:900;color:var(--gold);line-height:1;}
+.counter-label{font-size:10px;color:rgba(255,255,255,0.8);line-height:1.4;}
+.counter-total{text-align:right;font-size:10px;color:rgba(255,255,255,0.6);}
+.counter-total span{color:var(--gold);font-weight:800;font-size:14px;}
+/* TABS */
+.tabs{display:flex;overflow-x:auto;background:white;border-bottom:2px solid #e5e7eb;-webkit-overflow-scrolling:touch;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab-btn{padding:10px 14px;border:none;background:transparent;font-size:11px;font-weight:600;font-family:'Noto Sans Lao',sans-serif;color:var(--gray);cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all 0.2s;}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary);background:#f0f4ff;}
+.tab-badge{background:var(--danger);color:white;border-radius:10px;padding:1px 5px;font-size:9px;margin-left:3px;}
+/* CONTENT */
+.content{flex:1;padding:14px;overflow-y:auto;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+/* CARD */
+.card{background:white;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.card-title{font-size:14px;font-weight:700;color:var(--primary);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+/* BUTTONS */
+.btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,#003087,#0052cc);color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-secondary{flex:1;padding:11px;background:white;border:2px solid #e5e7eb;border-radius:10px;font-size:12px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.btn-row{display:flex;gap:8px;margin-bottom:10px;}
+.btn-danger{background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;width:100%;}
+/* SEARCH BAR */
+.search-bar{width:100%;padding:10px 12px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px;font-family:'Noto Sans Lao',sans-serif;margin-bottom:10px;}
+.search-bar:focus{outline:none;border-color:var(--primary);}
+/* FOUND CARD */
+.found-card{background:linear-gradient(135deg,#f0f7ff,#e8f4ff);border:2px solid #bfdbfe;border-radius:14px;padding:14px;margin-bottom:12px;display:none;}
+.found-card.show{display:block;}
+.found-name{font-size:16px;font-weight:800;color:var(--primary);margin-bottom:6px;}
+.found-meta{font-size:12px;color:var(--gray);line-height:1.7;}
+.found-status{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-top:6px;}
+.status-ready{background:#dcfce7;color:#059669;}
+.status-problem{background:#fee2e2;color:#dc2626;}
+.status-delivered{background:#dbeafe;color:#2563eb;}
+/* DELIVERY FORM */
+.delivery-form{display:none;margin-top:10px;}
+.delivery-form.show{display:block;}
+.radio-group{display:flex;gap:8px;margin-bottom:10px;}
+.radio-btn{flex:1;padding:10px;border:2px solid #e5e7eb;border-radius:10px;text-align:center;font-size:12px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;transition:all 0.2s;}
+.radio-btn.selected{border-color:var(--primary);background:var(--primary);color:white;}
+.proxy-input{width:100%;padding:10px 12px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px;font-family:'Noto Sans Lao',sans-serif;margin-bottom:10px;display:none;}
+.proxy-input.show{display:block;}
+/* CAMERA */
+.camera-box{border-radius:12px;overflow:hidden;background:#000;margin-bottom:10px;display:none;}
+.camera-box.show{display:block;}
+video{width:100%;display:block;}
+canvas{display:none;}
+/* ITEMS */
+.history-item,.pending-item{background:white;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.06);border-left:4px solid var(--success);}
+.pending-item{border-left-color:var(--warning);}
+.pending-item.overdue{border-left-color:var(--danger);}
+.history-name,.pending-name{font-size:13px;font-weight:700;color:#1f2937;}
+.history-meta,.pending-meta{font-size:11px;color:var(--gray);margin-top:4px;line-height:1.6;}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;}
+.badge-danger{background:#fee2e2;color:var(--danger);}
+.date-row{display:flex;gap:8px;margin-bottom:10px;}
+.date-row input{flex:1;padding:9px 10px;border:2px solid #e5e7eb;border-radius:8px;font-size:12px;font-family:'Noto Sans Lao',sans-serif;}
+/* OVERDUE */
+.overdue-stats{display:flex;gap:8px;margin-bottom:12px;}
+.overdue-stat{flex:1;border-radius:10px;padding:8px;text-align:center;}
+.overdue-stat.red{background:#fee2e2;border:1px solid #dc2626;}
+.overdue-stat.orange{background:#fff7ed;border:1px solid #ea580c;}
+.overdue-stat.yellow{background:#fefce8;border:1px solid #ca8a04;}
+.overdue-num{font-size:20px;font-weight:900;}
+.overdue-lbl{font-size:9px;}
+.filter-row{display:flex;gap:6px;margin-bottom:10px;}
+.filter-btn{flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;border:2px solid;}
+/* SAVING */
+.saving{position:fixed;bottom:20px;right:20px;background:var(--primary);color:white;padding:10px 16px;border-radius:10px;font-size:12px;font-weight:600;display:none;z-index:200;}
+/* POPUP */
+.popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+.popup-overlay.show{display:flex;}
+.popup-box{background:white;border-radius:20px;width:100%;max-width:360px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.4);}
+.popup-header{padding:24px 20px 16px;text-align:center;}
+.popup-header.success{background:linear-gradient(135deg,#059669,#047857);}
+.popup-header.danger{background:linear-gradient(135deg,#dc2626,#b91c1c);}
+.popup-header.warning{background:linear-gradient(135deg,#d97706,#b45309);}
+.popup-icon{font-size:44px;margin-bottom:6px;}
+.popup-title{color:white;font-size:16px;font-weight:800;}
+.popup-body{padding:14px 18px;}
+.popup-msg{font-size:12px;color:#374151;line-height:1.8;}
+.popup-close{width:100%;padding:13px;border:none;font-size:13px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;color:white;}
+.popup-close.success{background:#059669;}
+.popup-close.danger{background:#dc2626;}
+.popup-close.warning{background:#d97706;}
+/* OVERDUE POPUP */
+.ov-popup{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px);}
+.ov-popup.show{display:flex;}
+@keyframes popIn{from{opacity:0;transform:scale(0.9);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-page" id="loginPage">
+  <div class="login-box">
+    <div class="login-logo"><img src="logo.png" onerror="this.parentElement.innerHTML='🚔'"></div>
+    <div class="login-title">ເຂົ້າສູ່ລະບົບພະນັກງານ</div>
+    <div class="login-sub">ປກສ ເມືອງເຊບັ້ງໄຟ</div>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="ພິມ username..." autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="ພິມ password..." autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-login" onclick="doLogin()" id="loginBtn">🔐 ເຂົ້າສູ່ລະບົບ</button>
+    <div class="login-err" id="loginError">❌ ຊື່ຜູ້ໃຊ້ ຫຼື ລະຫັດຜ່ານຜິດ</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app-page" id="appPage">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo"><img src="logo.png" onerror="this.parentElement.innerHTML='🚔'"></div>
+      <div class="topbar-info">
+        <h2>ລະບົບພະນັກງານ</h2>
+        <p id="topbarUser">ສະບາຍດີ</p>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">ອອກ</button>
+  </div>
+
+  <div class="counter-bar" id="counterBar">
+    <div class="counter-today">
+      <div class="counter-num" id="todayCount">0</div>
+      <div class="counter-label">ຈັດສົ່ງ<br>ມື້ນີ້</div>
+    </div>
+    <div class="counter-total">
+      ຈັດສົ່ງລວມທັງໝົດ<br>
+      <span id="totalCount">-</span> ໃບ
+    </div>
+  </div>
+
+  <div class="tabs" id="tabBar">
+    <button class="tab-btn active" onclick="switchTab('scan')">📷 ຈັດສົ່ງ</button>
+    <button class="tab-btn" onclick="switchTab('pending')">⏳ ລໍຖ້າ</button>
+    <button class="tab-btn" onclick="switchTab('history')">✅ ສຳເລັດ</button>
+    <button class="tab-btn" onclick="switchTab('problems')">❌ ບັນຫາ</button>
+    <button class="tab-btn" id="overdueTab" onclick="switchTab('overdue')">🚨 ຄ້າງດົນ<span class="tab-badge" id="overdueCount" style="display:none">0</span></button>
+  </div>
+
+  <div class="content">
+
+    <!-- SCAN TAB -->
+    <div class="tab-panel active" id="tab-scan">
+      <div class="card">
+        <div class="card-title">🔍 ຄົ້ນຫາບຸກຄົນ</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <button class="btn-secondary" onclick="showManual()">⌨️ ພິມຊື່</button>
+          <button class="btn-secondary" onclick="startQR()">📷 ສະແກນ QR</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <button class="btn-secondary" onclick="document.getElementById('qrCapture').click()">📸 ຖ່າຍຮູບ</button>
+          <button class="btn-secondary" onclick="document.getElementById('qrGallery').click()">🖼️ ຈາກຄັງ</button>
+        </div>
+        <input type="file" id="qrCapture" accept="image/*" capture="environment" style="display:none" onchange="readQRFile(event)">
+        <input type="file" id="qrGallery" accept="image/*" style="display:none" onchange="readQRFile(event)">
+
+        <!-- Manual Input -->
+        <div id="manualInput" style="display:none;">
+          <input class="search-bar" type="text" id="manualFn" placeholder="ຊື່...">
+          <input class="search-bar" type="text" id="manualLn" placeholder="ນາມສະກຸນ...">
+          <button class="btn-primary" onclick="searchManual()">🔍 ຄົ້ນຫາ</button>
+        </div>
+
+        <!-- Camera -->
+        <div class="camera-box" id="cameraBox">
+          <video id="camVideo" playsinline autoplay muted></video>
+          <canvas id="camCanvas"></canvas>
+          <button onclick="stopQR()" style="width:100%;padding:10px;background:#dc2626;color:white;border:none;font-size:13px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;">⏹️ ປິດກ້ອງ</button>
+        </div>
+
+        <!-- Found Card -->
+        <div class="found-card" id="foundCard">
+          <div class="found-name" id="foundName"></div>
+          <div class="found-meta" id="foundMeta"></div>
+        </div>
+
+        <!-- Delivery Form -->
+        <div class="delivery-form" id="deliveryForm">
+          <div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;">ເລືອກປະເພດຮັບ:</div>
+          <div class="radio-group">
+            <div class="radio-btn selected" id="rbSelf" onclick="selectRecipient('self')">👤 ຮັບເອງ</div>
+            <div class="radio-btn" id="rbProxy" onclick="selectRecipient('proxy')">👥 ຮັບແທນ</div>
+          </div>
+          <input class="proxy-input" type="text" id="proxyName" placeholder="ຊື່ຜູ້ຮັບແທນ...">
+          <button class="btn-primary" onclick="confirmDelivery()" id="confirmBtn">✅ ຢືນຢັນຈັດສົ່ງ</button>
+          <button class="btn-danger" onclick="markProblem()">❌ ໝາຍ ບັດມີບັນຫາ</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PENDING TAB -->
+    <div class="tab-panel" id="tab-pending">
+      <div class="card">
+        <div class="card-title">⏳ ລາຍການລໍຖ້າຈັດສົ່ງ</div>
+        <button class="btn-primary" onclick="loadPending()">🔄 ໂຫຼດຂໍ້ມູນ</button>
+        <input class="search-bar" type="text" id="pendSearch" placeholder="ຄົ້ນຫາຊື່..." oninput="filterPending()">
+        <div id="pendingList"><div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">ກົດ "ໂຫຼດຂໍ້ມູນ"</div></div>
+      </div>
+    </div>
+
+    <!-- HISTORY TAB -->
+    <div class="tab-panel" id="tab-history">
+      <div class="card">
+        <div class="card-title">✅ ລາຍການຈັດສົ່ງສຳເລັດ</div>
+        <button class="btn-primary" onclick="loadHistory()">🔄 ໂຫຼດຂໍ້ມູນ</button>
+        <input class="search-bar" type="text" id="histSearch" placeholder="ຄົ້ນຫາຊື່..." oninput="filterHistory()">
+        <div class="date-row">
+          <input type="date" id="histFrom" onchange="filterHistory()">
+          <span style="align-self:center;font-size:11px;color:var(--gray);">ຫາ</span>
+          <input type="date" id="histTo" onchange="filterHistory()">
+        </div>
+        <div id="historyList"><div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">ກົດ "ໂຫຼດຂໍ້ມູນ"</div></div>
+      </div>
+    </div>
+
+    <!-- PROBLEMS TAB -->
+    <div class="tab-panel" id="tab-problems">
+      <div class="card">
+        <div class="card-title">❌ ບັດທີ່ມີບັນຫາ</div>
+        <button class="btn-primary" onclick="loadProblems()" style="background:linear-gradient(135deg,#dc2626,#b91c1c);">🔄 ໂຫຼດຂໍ້ມູນ</button>
+        <input class="search-bar" type="text" id="probSearch" placeholder="ຄົ້ນຫາຊື່..." oninput="filterProblems()">
+        <div id="problemList"><div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">ກົດ "ໂຫຼດຂໍ້ມູນ"</div></div>
+      </div>
+    </div>
+
+    <!-- OVERDUE TAB -->
+    <div class="tab-panel" id="tab-overdue">
+      <div class="card">
+        <div class="card-title">🚨 ບັດຄ້າງດົນ</div>
+        <div class="overdue-stats">
+          <div class="overdue-stat red"><div class="overdue-num" id="cnt60" style="color:#dc2626">0</div><div class="overdue-lbl" style="color:#dc2626">🔴 >60ວັນ</div></div>
+          <div class="overdue-stat orange"><div class="overdue-num" id="cnt30" style="color:#ea580c">0</div><div class="overdue-lbl" style="color:#ea580c">🟠 >30ວັນ</div></div>
+          <div class="overdue-stat yellow"><div class="overdue-num" id="cnt15" style="color:#ca8a04">0</div><div class="overdue-lbl" style="color:#ca8a04">🟡 >15ວັນ</div></div>
+        </div>
+        <div class="filter-row">
+          <button class="filter-btn" id="fbAll" onclick="filterOverdueLevel('all')" style="border-color:var(--primary);background:var(--primary);color:white;">ທັງໝົດ</button>
+          <button class="filter-btn" id="fb60" onclick="filterOverdueLevel('60')" style="border-color:#dc2626;color:#dc2626;background:white;">🔴 >60</button>
+          <button class="filter-btn" id="fb30" onclick="filterOverdueLevel('30')" style="border-color:#ea580c;color:#ea580c;background:white;">🟠 >30</button>
+          <button class="filter-btn" id="fb15" onclick="filterOverdueLevel('15')" style="border-color:#ca8a04;color:#ca8a04;background:white;">🟡 >15</button>
+        </div>
+        <input class="search-bar" type="text" id="ovSearch" placeholder="ຄົ້ນຫາຊື່..." oninput="filterOverdue()">
+        <div id="overdueList"><div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">ກຳລັງໂຫຼດ...</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- OVERDUE POPUP -->
+<div class="ov-popup" id="ovPopup"></div>
+
+<!-- POPUP -->
+<div class="popup-overlay" id="popup">
+  <div class="popup-box">
+    <div class="popup-header success" id="popHeader">
+      <div class="popup-icon" id="popIcon"></div>
+      <div class="popup-title" id="popTitle"></div>
+    </div>
+    <div class="popup-body"><div class="popup-msg" id="popMsg"></div></div>
+    <button class="popup-close success" id="popClose" onclick="closePopup()">ຕົກລົງ</button>
+  </div>
+</div>
+
+<div class="saving" id="savingIndicator">💾 ກຳລັງບັນທຶກ...</div>
+
+<script>
+const APPS = 'https://script.google.com/macros/s/AKfycbxHLR4Ba3toWa4JL6PMvK1oZ70Pjz5596BMEEEThWEYV-qj-wdlLyCSw5d3Zp6c7HM/exec';
+let currentUser = null;
+let userToken = null;
+let allCards = [];
+let allHistory = [];
+let allPending = [];
+let allProblems = [];
+let allOverdue = [];
+let overdueLevel = 'all';
+let foundData = null;
+let recipientType = 'self';
+let todayDelivered = 0;
+let camStream = null;
+let scanning = false;
+let logoutTimer = null;
+
+// ====== LOGIN ======
+async function doLogin() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value.trim();
+  if (!user || !pass) return;
+  document.getElementById('loginBtn').textContent = '⏳ ກຳລັງເຂົ້າ...';
+  document.getElementById('loginBtn').disabled = true;
+  try {
+    const res = await fetch(APPS, {
+      method: 'POST',
+      body: JSON.stringify({action:'login', username:user, password:pass})
+    });
+    const data = await res.json();
+    if (data.success) {
+      currentUser = {name: data.name, role: data.role};
+      userToken = data.token;
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('appPage').style.display = 'flex';
+      document.getElementById('topbarUser').textContent = 'ສະບາຍດີ: ' + data.name;
+      startLogoutTimer();
+      loadAllData();
+      setTimeout(() => loadOverdueData(), 600);
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+      setTimeout(() => document.getElementById('loginError').style.display='none', 3000);
+    }
+  } catch(e) {
+    alert('❌ ເຊື່ອມຕໍ່ບໍ່ໄດ້ ກວດເນັດ');
+  }
+  document.getElementById('loginBtn').textContent = '🔐 ເຂົ້າສູ່ລະບົບ';
+  document.getElementById('loginBtn').disabled = false;
+}
+
+function doLogout() {
+  if (!confirm('ຕ້ອງການອອກຈາກລະບົບ?')) return;
+  currentUser = null; userToken = null;
+  if (logoutTimer) clearTimeout(logoutTimer);
+  stopQR();
+  document.getElementById('appPage').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+function startLogoutTimer() {
+  if (logoutTimer) clearTimeout(logoutTimer);
+  logoutTimer = setTimeout(() => {
+    alert('⏰ ລະບົບ Logout ອັດຕະໂນມັດ (8 ຊົ່ວໂມງ)');
+    doLogout();
+  }, 8*60*60*1000);
+}
+
+// ====== TABS ======
+function switchTab(t) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['scan','pending','history','problems','overdue'][i]===t);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  stopQR();
+  if (t==='overdue') renderOverdue();
+}
+
+// ====== LOAD DATA ======
+async function loadAllData() {
+  try {
+    const res = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getCards', token:userToken})});
+    const data = await res.json();
+    if (data.status==='ok') {
+      allCards = data.data || [];
+      allPending = allCards.filter(c => c.status && c.status.includes('ພີມບັດສຳເລັດ'));
+      allProblems = allCards.filter(c => c.status && c.status.includes('ບັດມີບັນຫາ'));
+    }
+  } catch(e) {}
+  loadHistory();
+  loadTotalDelivered();
+}
+
+async function loadHistory() {
+  const el = document.getElementById('historyList');
+  el.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">ກຳລັງໂຫຼດ...</div>';
+  try {
+    const res = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getDeliveries', token:userToken})});
+    const data = await res.json();
+    if (data.status==='ok') {
+      allHistory = (data.data || []).reverse();
+      filterHistory();
+    }
+  } catch(e) { el.innerHTML = '<div style="text-align:center;color:var(--danger);font-size:13px;padding:16px;">ເກີດຂໍ້ຜິດພາດ</div>'; }
+}
+
+async function loadTotalDelivered() {
+  try {
+    const res = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getDeliveries', token:userToken})});
+    const data = await res.json();
+    if (data.status==='ok') {
+      const rows = data.data || [];
+      document.getElementById('totalCount').textContent = rows.length.toLocaleString();
+      const now = new Date();
+      const today = rows.filter(r => {
+        if (!r.date) return false;
+        const p = r.date.split('/');
+        if (p.length===3) {
+          return Number(p[0])===now.getDate() && Number(p[1])===now.getMonth()+1 && Number(p[2])===now.getFullYear();
+        }
+        return false;
+      });
+      const myToday = today.filter(r => r.staff === currentUser?.name);
+      todayDelivered = myToday.length;
+      document.getElementById('todayCount').textContent = todayDelivered;
+    }
+  } catch(e) {}
+}
+
+function loadPending() {
+  const el = document.getElementById('pendingList');
+  if (!allPending.length) { el.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">ບໍ່ມີຂໍ້ມູນ</div>'; return; }
+  filterPending();
+}
+
+function loadProblems() {
+  filterProblems();
+}
+
+// ====== FILTERS ======
+function filterHistory() {
+  const q = document.getElementById('histSearch').value.trim().toLowerCase();
+  const fr = document.getElementById('histFrom').value;
+  const to = document.getElementById('histTo').value;
+  let data = [...allHistory];
+  if (q) data = data.filter(h => (h.firstName+' '+h.lastName).toLowerCase().includes(q) || (h.staff||'').toLowerCase().includes(q));
+  if (fr||to) data = data.filter(h => {
+    if (!h.date) return true;
+    const p = h.date.split('/');
+    if (p.length!==3) return true;
+    const d = new Date(Number(p[2]), Number(p[1])-1, Number(p[0]));
+    if (fr && d < new Date(fr)) return false;
+    if (to && d > new Date(to+'T23:59:59')) return false;
+    return true;
+  });
+  const el = document.getElementById('historyList');
+  if (!data.length) { el.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">ບໍ່ພົບຂໍ້ມູນ</div>'; return; }
+  el.innerHTML = data.slice(0,100).map(h =>
+    '<div class="history-item"><div class="history-name">'+h.firstName+' '+h.lastName+'<\/div><div class="history-meta">📅 '+h.date+' '+h.time+'<br>👷 '+(h.staff||'-')+' · 👤 '+(h.recipient||'-')+(h.proxy?' ('+h.proxy+')':'')+' <\/div><\/div>'
+  ).join('');
+}
+
+function filterPending() {
+  const q = document.getElementById('pendSearch').value.trim().toLowerCase();
+  let data = q ? allPending.filter(c => (c.firstName+' '+c.lastName).toLowerCase().includes(q)) : [...allPending];
+  const el = document.getElementById('pendingList');
+  if (!data.length) { el.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">ບໍ່ມີຂໍ້ມູນ</div>'; return; }
+  el.innerHTML = data.map(c => {
+    const od = isOverdue(c.date);
+    return '<div class="pending-item'+(od?' overdue':'')+'"><div class="pending-name">'+c.firstName+' '+c.lastName+(od?' <span class="badge badge-danger">🚨 ຄ້າງດົນ<\/span>':'')+' <\/div><div class="pending-meta">📅 ເພີ່ມ: '+(c.date||'-')+'<\/div><\/div>';
+  }).join('');
+}
+
+function filterProblems() {
+  const q = document.getElementById('probSearch').value.trim().toLowerCase();
+  let data = q ? allProblems.filter(c => (c.firstName+' '+c.lastName).toLowerCase().includes(q)) : [...allProblems];
+  const el = document.getElementById('problemList');
+  if (!data.length) { el.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">ບໍ່ມີຂໍ້ມູນ</div>'; return; }
+  el.innerHTML = data.map(c =>
+    '<div class="history-item" style="border-left-color:#dc2626"><div class="history-name">❌ '+c.firstName+' '+c.lastName+'<\/div><div class="history-meta">📅 '+(c.date||'-')+'<\/div><\/div>'
+  ).join('');
+}
+
+// ====== SEARCH ======
+function showManual() {
+  const m = document.getElementById('manualInput');
+  m.style.display = m.style.display==='none'?'block':'none';
+}
+
+async function searchManual() {
+  const fn = normalize(document.getElementById('manualFn').value);
+  const ln = normalize(document.getElementById('manualLn').value);
+  if (!fn||!ln) { alert('ກະລຸນາໃສ່ຊື່ ແລະ ນາມສະກຸນ'); return; }
+  await searchCard(fn, ln, '');
+}
+
+async function searchCard(fn, ln, dob) {
+  // ຂັ້ນ 1: ຄົ້ນຫາດ້ວຍ ຊື່+ນາມ
+  const matched = allCards.filter(c =>
+    normalize(c.firstName)===fn && normalize(c.lastName)===ln
+  );
+
+  if (matched.length === 0) {
+    showFoundCard(null, fn, ln);
+    return;
+  }
+
+  // ຂັ້ນ 2: ຖ້າພົບຫຼາຍຄົນ → ກວດ ວັນເກີດ
+  if (matched.length > 1 && dob) {
+    const dobFormatted = convertDOB(dob);
+    const exactMatch = matched.filter(c => {
+      const cd = (c.dob || '').toString().trim();
+      return cd === dobFormatted || cd === dob;
+    });
+
+    if (exactMatch.length === 1) {
+      foundData = exactMatch[0];
+      showFoundCard(exactMatch[0], fn, ln);
+      return;
+    }
+
+    if (exactMatch.length > 1) {
+      showFoundCard(null, fn, ln, '⚠️ ຂໍ້ມູນຊ້ຳກັນ ກະລຸນາແຈ້ງຜູ້ດູແລລະບົບ');
+      return;
+    }
+
+    // DOB ບໍ່ຕົງ → ໃຊ້ຄົນທຳອິດ
+    foundData = matched[0];
+    showFoundCard(matched[0], fn, ln);
+    return;
+  }
+
+  // ຂັ້ນ 3: ພົບຄົນດຽວ → ສະແດງທັນທີ
+  foundData = matched[0];
+  showFoundCard(matched[0], fn, ln);
+}
+
+function convertDOB(raw) {
+  if (!raw) return '';
+  raw = raw.toString().trim();
+  // DDMMYYYY → DD/MM/YYYY
+  if (/^\d{8}$/.test(raw)) {
+    return raw.substring(0,2)+'/'+raw.substring(2,4)+'/'+raw.substring(4,8);
+  }
+  // DDMMYY → DD/MM/20YY
+  if (/^\d{6}$/.test(raw)) {
+    return raw.substring(0,2)+'/'+raw.substring(2,4)+'/20'+raw.substring(4,6);
+  }
+  return raw;
+}
+
+function showFoundCard(card, fn, ln, errMsg) {
+  const fc = document.getElementById('foundCard');
+  const df = document.getElementById('deliveryForm');
+  fc.classList.add('show');
+  df.classList.remove('show');
+
+  if (!card) {
+    document.getElementById('foundName').textContent = errMsg ? errMsg : '❌ ບໍ່ພົບ: '+fn+' '+ln;
+    document.getElementById('foundMeta').textContent = errMsg ? 'ກະລຸນາຕິດຕໍ່ຜູ້ດູແລລະບົບ' : 'ກວດຊື່ຄືນໃໝ່ ຫຼື ບໍ່ມີໃນລະບົບ';
+    foundData = null;
+    return;
+  }
+
+  document.getElementById('foundName').textContent = card.firstName+' '+card.lastName;
+  let statusClass = 'status-ready';
+  let statusText = card.status;
+  if (card.status.includes('ຈັດສົ່ງສຳເລັດ')) statusClass='status-delivered';
+  if (card.status.includes('ບັດມີບັນຫາ')) statusClass='status-problem';
+  document.getElementById('foundMeta').innerHTML =
+    '<span class="found-status '+statusClass+'">'+statusText+'<\/span>';
+
+  if (card.status.includes('ພີມບັດສຳເລັດ')) {
+    df.classList.add('show');
+  } else if (card.status.includes('ຈັດສົ່ງສຳເລັດ')) {
+    showPopup('📦','ຈັດສົ່ງໄປແລ້ວ!',card.firstName+' '+card.lastName+' ໄດ້ຮັບບັດໄປແລ້ວ','warning');
+  }
+}
+
+// ====== QR ======
+function startQR() {
+  const box = document.getElementById('cameraBox');
+  box.classList.add('show');
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}}).then(s => {
+    camStream = s;
+    const v = document.getElementById('camVideo');
+    v.srcObject = s; v.play();
+    scanning = true;
+    scanLoop();
+  }).catch(e => { alert('ກ້ອງໃຊ້ບໍ່ໄດ້: '+e.message); });
+}
+
+function stopQR() {
+  scanning = false;
+  if (camStream) { camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
+  document.getElementById('cameraBox').classList.remove('show');
+}
+
+function scanLoop() {
+  if (!scanning) return;
+  const v = document.getElementById('camVideo');
+  const c = document.getElementById('camCanvas');
+  if (v.readyState===v.HAVE_ENOUGH_DATA && v.videoWidth>0) {
+    c.width=v.videoWidth; c.height=v.videoHeight;
+    const ctx=c.getContext('2d');
+    ctx.drawImage(v,0,0);
+    const img=ctx.getImageData(0,0,c.width,c.height);
+    if (typeof jsQR !== 'undefined') {
+      const code=jsQR(img.data,img.width,img.height,{inversionAttempts:'attemptBoth'});
+      if (code && code.data) {
+        const parsed = parseQR(code.data);
+        if (parsed) {
+          stopQR();
+          playBeep();
+          if (navigator.vibrate) navigator.vibrate([100,50,100]);
+          searchCard(parsed.fn, parsed.ln, parsed.dob);
+          return;
+        }
+      }
+    }
+  }
+  requestAnimationFrame(scanLoop);
+}
+
+function readQRFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.getElementById('camCanvas');
+      c.width=img.width; c.height=img.height;
+      c.getContext('2d').drawImage(img,0,0);
+      const imgData=c.getContext('2d').getImageData(0,0,c.width,c.height);
+      if (typeof jsQR !== 'undefined') {
+        const code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'attemptBoth'});
+        if (code && code.data) {
+          const parsed = parseQR(code.data);
+          if (parsed) {
+            playBeep();
+            searchCard(parsed.fn, parsed.ln, parsed.dob);
+            return;
+          }
+        }
+      }
+      alert('❌ ອ່ານ QR ບໍ່ໄດ້ ລອງໃໝ່');
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
+
+function parseQR(raw) {
+  if (!raw) return null;
+  const parts = raw.split('|');
+  if (parts.length < 3) return null;
+  // Format: ID|ຊື່ ນາມ|DDMMYYYY|...
+  const namePart = parts[1] ? parts[1].trim() : '';
+  const dobPart = parts[2] ? parts[2].trim() : '';
+  const nameSplit = namePart.split(' ');
+  const fn = normalize(nameSplit[0] || '');
+  const ln = normalize(nameSplit.slice(1).join(' ') || '');
+  if (!fn) return null;
+  return {fn, ln, dob: dobPart};
+}
+
+// ====== RECIPIENT ======
+function selectRecipient(type) {
+  recipientType = type;
+  document.getElementById('rbSelf').classList.toggle('selected', type==='self');
+  document.getElementById('rbProxy').classList.toggle('selected', type==='proxy');
+  document.getElementById('proxyName').classList.toggle('show', type==='proxy');
+}
+
+// ====== DELIVERY ======
+async function confirmDelivery() {
+  if (!foundData) return;
+  const proxy = recipientType==='proxy' ? document.getElementById('proxyName').value.trim() : '';
+  if (recipientType==='proxy' && !proxy) { alert('⚠️ ພິມຊື່ຜູ້ຮັບແທນ'); return; }
+
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2,'0');
+  const mo = String(now.getMonth()+1).padStart(2,'0');
+  const yr = now.getFullYear();
+  const dateStr = day+'/'+mo+'/'+yr;
+  const h = String(now.getHours()).padStart(2,'0');
+  const mn = String(now.getMinutes()).padStart(2,'0');
+  const timeStr = h+':'+mn;
+
+  document.getElementById('confirmBtn').textContent = '⏳ ກຳລັງບັນທຶກ...';
+  document.getElementById('confirmBtn').disabled = true;
+
+  try {
+    await fetch(APPS, {
+      method:'POST',
+      mode:'no-cors',
+      body: JSON.stringify({
+        action:'delivery',
+        token: userToken,
+        firstName: foundData.firstName,
+        lastName: foundData.lastName,
+        staff: currentUser.name,
+        date: dateStr,
+        time: timeStr,
+        recipient: recipientType==='self'?'ຮັບດ້ວຍຕົນເອງ':'ມີຄົນຮັບແທນ',
+        proxy: proxy,
+      })
+    });
+  } catch(e) {}
+
+  // Update local
+  const idx = allCards.findIndex(c => c.firstName===foundData.firstName && c.lastName===foundData.lastName);
+  if (idx>=0) { allCards[idx].status='ຈັດສົ່ງສຳເລັດ'; }
+  allPending = allCards.filter(c => c.status && c.status.includes('ພີມບັດສຳເລັດ'));
+
+  todayDelivered++;
+  document.getElementById('todayCount').textContent = todayDelivered;
+  const tot = document.getElementById('totalCount');
+  if (tot.textContent!=='-') tot.textContent = (parseInt(tot.textContent.replace(/,/g,''))+1).toLocaleString();
+
+  playSuccessSound();
+  if (navigator.vibrate) navigator.vibrate([100,50,200]);
+  showPopup('✅','ຈັດສົ່ງສຳເລັດ!',foundData.firstName+' '+foundData.lastName+'\n📅 '+dateStr+' '+timeStr+'\n👤 '+(recipientType==='self'?'ຮັບດ້ວຍຕົນເອງ':proxy),'success');
+
+  document.getElementById('foundCard').classList.remove('show');
+  document.getElementById('deliveryForm').classList.remove('show');
+  foundData = null;
+  document.getElementById('manualFn').value='';
+  document.getElementById('manualLn').value='';
+
+  document.getElementById('confirmBtn').textContent = '✅ ຢືນຢັນຈັດສົ່ງ';
+  document.getElementById('confirmBtn').disabled = false;
+}
+
+async function markProblem() {
+  if (!foundData || !confirm('ໝາຍ "ບັດມີບັນຫາ" ສຳລັບ '+foundData.firstName+' '+foundData.lastName+'?')) return;
+  try {
+    await fetch(APPS, {
+      method:'POST', mode:'no-cors',
+      body: JSON.stringify({action:'problem', token:userToken, firstName:foundData.firstName, lastName:foundData.lastName, staff:currentUser.name, reason:''})
+    });
+  } catch(e) {}
+  showPopup('⚠️','ໝາຍສຳເລັດ',foundData.firstName+' '+foundData.lastName+' ໝາຍເປັນ "ບັດມີບັນຫາ"','warning');
+  document.getElementById('foundCard').classList.remove('show');
+  document.getElementById('deliveryForm').classList.remove('show');
+  foundData=null;
+  loadAllData();
+}
+
+// ====== OVERDUE ======
+async function loadOverdueData() {
+  try {
+    const c60 = allPending.filter(c => getDays(c.date)>60).length;
+    const c30 = allPending.filter(c => getDays(c.date)>30&&getDays(c.date)<=60).length;
+    const c15 = allPending.filter(c => getDays(c.date)>=15&&getDays(c.date)<=30).length;
+    allOverdue = allPending.map(c=>({...c,days:getDays(c.date)})).filter(c=>c.days>=15).sort((a,b)=>b.days-a.days);
+    document.getElementById('cnt60').textContent=c60;
+    document.getElementById('cnt30').textContent=c30;
+    document.getElementById('cnt15').textContent=c15;
+    const total=allOverdue.length;
+    const badge=document.getElementById('overdueCount');
+    if(total>0){badge.textContent=total;badge.style.display='inline';}
+    if(total>0) showOverduePopup(total,c60,c30,c15);
+    renderOverdue();
+  } catch(e){}
+}
+
+function getDays(dateStr) {
+  if (!dateStr) return -1;
+  const p = dateStr.split('/');
+  if (p.length!==3) return -1;
+  const d = new Date(Number(p[2]),Number(p[1])-1,Number(p[0]));
+  if (isNaN(d)) return -1;
+  return Math.floor((new Date()-d)/86400000);
+}
+
+function isOverdue(dateStr) { return getDays(dateStr)>30; }
+
+function filterOverdueLevel(lv) {
+  overdueLevel=lv;
+  ['All','60','30','15'].forEach(l=>{
+    const b=document.getElementById('fb'+l);
+    if(!b)return;
+    const colors={'All':['var(--primary)','white'],'60':['#dc2626','white'],'30':['#ea580c','white'],'15':['#ca8a04','white']};
+    const c=colors[l]||colors.All;
+    b.style.background=l===lv?c[0]:'white';
+    b.style.color=l===lv?c[1]:c[0];
+  });
+  renderOverdue();
+}
+
+function filterOverdue(){renderOverdue();}
+
+function renderOverdue(){
+  const el=document.getElementById('overdueList');
+  if(!el)return;
+  const q=(document.getElementById('ovSearch')?.value||'').trim().toLowerCase();
+  let data=[...allOverdue];
+  if(overdueLevel==='60')data=data.filter(c=>c.days>60);
+  else if(overdueLevel==='30')data=data.filter(c=>c.days>30&&c.days<=60);
+  else if(overdueLevel==='15')data=data.filter(c=>c.days>=15&&c.days<=30);
+  if(q)data=data.filter(c=>(c.firstName+' '+c.lastName).toLowerCase().includes(q));
+  if(!data.length){el.innerHTML='<div style="text-align:center;color:var(--gray);font-size:13px;padding:20px;">ບໍ່ມີບັດຄ້າງດົນ ✅<\/div>';return;}
+  el.innerHTML=data.map(c=>{
+    const col=c.days>60?'#dc2626':c.days>30?'#ea580c':'#ca8a04';
+    const bg=c.days>60?'#fee2e2':c.days>30?'#fff7ed':'#fefce8';
+    const ic=c.days>60?'🔴':c.days>30?'🟠':'🟡';
+    return '<div style="background:white;border-radius:12px;padding:11px 13px;margin-bottom:7px;box-shadow:0 2px 8px rgba(0,0,0,0.06);border-left:4px solid '+col+';">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;">'+
+      '<span style="font-size:13px;font-weight:700;color:#1f2937;">'+ic+' '+c.firstName+' '+c.lastName+'<\/span>'+
+      '<span style="background:'+bg+';color:'+col+';border-radius:8px;padding:3px 9px;font-size:11px;font-weight:800;">'+c.days+' ວັນ<\/span><\/div>'+
+      '<div style="font-size:11px;color:var(--gray);margin-top:3px;">📅 '+(c.date||'-')+'<\/div><\/div>';
+  }).join('');
+}
+
+function showOverduePopup(total,c60,c30,c15) {
+  var ov=document.getElementById('ovPopup');
+  var rows='';
+  for(var i=0;i<Math.min(allOverdue.length,15);i++){
+    var c=allOverdue[i];
+    var ic=c.days>60?'🔴':c.days>30?'🟠':'🟡';
+    var bg=c.days>60?'#fee2e2':c.days>30?'#fff7ed':'#fefce8';
+    var col=c.days>60?'#dc2626':c.days>30?'#ea580c':'#ca8a04';
+    rows+='<div style="display:flex;justify-content:space-between;padding:6px 8px;margin-bottom:3px;background:'+bg+';border-radius:7px;">'+
+      '<span style="font-size:12px;font-weight:600;color:#1f2937;">'+ic+' '+c.firstName+' '+c.lastName+'<\/span>'+
+      '<span style="font-size:11px;font-weight:800;color:'+col+';margin-left:6px;white-space:nowrap;">'+c.days+' ວັນ<\/span><\/div>';
+  }
+  if(allOverdue.length>15)rows+='<div style="text-align:center;font-size:11px;color:#6b7280;padding:5px;">...ອີກ '+(allOverdue.length-15)+' ຄົນ<\/div>';
+  ov.innerHTML='<div style="background:white;border-radius:22px;width:100%;max-width:390px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:popIn 0.3s ease;">'+
+    '<div style="background:linear-gradient(135deg,#7f1d1d,#dc2626);padding:18px 18px 14px;text-align:center;">'+
+    '<div style="font-size:36px;margin-bottom:4px;">🚨<\/div>'+
+    '<div style="color:white;font-size:15px;font-weight:900;">ບັດຄ້າງດົນ '+total+' ໃບ!<\/div>'+
+    '<div style="display:flex;gap:6px;justify-content:center;margin-top:10px;">'+
+    '<div style="background:rgba(255,255,255,0.2);border-radius:8px;padding:5px 10px;color:white;font-size:11px;text-align:center;"><div style="font-size:16px;font-weight:900;">'+c60+'<\/div><div>🔴 >60ວັນ<\/div><\/div>'+
+    '<div style="background:rgba(255,255,255,0.2);border-radius:8px;padding:5px 10px;color:white;font-size:11px;text-align:center;"><div style="font-size:16px;font-weight:900;">'+c30+'<\/div><div>🟠 >30ວັນ<\/div><\/div>'+
+    '<div style="background:rgba(255,255,255,0.2);border-radius:8px;padding:5px 10px;color:white;font-size:11px;text-align:center;"><div style="font-size:16px;font-weight:900;">'+c15+'<\/div><div>🟡 >15ວັນ<\/div><\/div><\/div><\/div>'+
+    '<div style="padding:12px 14px;"><div style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:7px;">📋 ລາຍຊື່ຄ້າງດົນ:<\/div>'+
+    '<div style="max-height:200px;overflow-y:auto;border-radius:10px;">'+rows+'<\/div><\/div>'+
+    '<div style="display:flex;gap:8px;padding:0 14px 14px;">'+
+    '<button id="btnOvView" style="flex:1;padding:11px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;">📋 ເບິ່ງທັງໝົດ<\/button>'+
+    '<button id="btnOvClose" style="flex:1;padding:11px;background:#f1f5f9;color:#475569;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;">ປິດ ✕<\/button><\/div><\/div>';
+  ov.classList.add('show');
+  document.getElementById('btnOvView').onclick=function(){ov.classList.remove('show');switchTab('overdue');};
+  document.getElementById('btnOvClose').onclick=function(){ov.classList.remove('show');};
+}
+
+// ====== POPUP ======
+function showPopup(icon,title,msg,type) {
+  document.getElementById('popIcon').textContent=icon;
+  document.getElementById('popTitle').textContent=title;
+  document.getElementById('popMsg').innerHTML=msg.split('\n').join('<br>');
+  document.getElementById('popHeader').className='popup-header '+type;
+  document.getElementById('popClose').className='popup-close '+type;
+  document.getElementById('popup').classList.add('show');
+}
+function closePopup(){document.getElementById('popup').classList.remove('show');}
+
+// ====== SOUND ======
+function playBeep() {
+  try {
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.frequency.value=1200;o.type='sine';
+    g.gain.setValueAtTime(1.0,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+0.4);
+  }catch(e){}
+}
+
+function playSuccessSound() {
+  try {
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    [[523,0],[659,0.15],[784,0.3]].forEach(([f,d])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=f;o.type='sine';
+      g.gain.setValueAtTime(0.8,ctx.currentTime+d);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+d+0.25);
+      o.start(ctx.currentTime+d);o.stop(ctx.currentTime+d+0.25);
+    });
+  }catch(e){}
+}
+
+// ====== NORMALIZE ======
+function normalize(t) {
+  if(!t)return'';
+  t=t.trim().replace(/^(ທ້າວ|ນາງສາວ|ນາງ|ທ\.?)\s*/u,'');
+  t=t.replace(/ຫນ/g,'ໜ').replace(/ຫມ/g,'ໝ').replace(/ຫລ/g,'ຫຼ');
+  return t.trim().toLowerCase();
+}
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(e=>console.log('SW:',e));
+  });
+}
+</script>
+</body>
+</html>
