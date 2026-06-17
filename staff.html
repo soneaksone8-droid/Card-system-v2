@@ -64,6 +64,8 @@ body{font-family:'Noto Sans Lao',sans-serif;background:var(--light);min-height:1
 .btn-secondary{flex:1;padding:11px;background:white;border:2px solid #e5e7eb;border-radius:10px;font-size:12px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
 .btn-row{display:flex;gap:8px;margin-bottom:10px;}
 .btn-danger{background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;width:100%;}
+.btn-cancel{background:white;color:#6b7280;border:2px solid #e5e7eb;border-radius:10px;padding:11px;font-size:13px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;width:100%;margin-top:4px;transition:all 0.2s;}
+.btn-cancel:active{background:#f3f4f6;}
 /* SEARCH BAR */
 .search-bar{width:100%;padding:10px 12px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px;font-family:'Noto Sans Lao',sans-serif;margin-bottom:10px;}
 .search-bar:focus{outline:none;border-color:var(--primary);}
@@ -276,6 +278,7 @@ canvas{display:none;}
           <input class="proxy-input" type="text" id="proxyName" placeholder="ຊື່ຜູ້ຮັບແທນ...">
           <button class="btn-primary" onclick="confirmDelivery()" id="confirmBtn">✅ ຢືນຢັນຈັດສົ່ງ</button>
           <button class="btn-danger" onclick="markProblem()">❌ ໝາຍ ບັດມີບັນຫາ</button>
+          <button class="btn-cancel" onclick="cancelScan()">🔄 ຍົກເລີກ / ສະແກນໃໝ່</button>
         </div>
       </div>
     </div>
@@ -819,7 +822,7 @@ async function confirmDelivery() {
   const dateStrShort = day+'/'+mo+'/'+String(yr).slice(-2); // Short for display
   const h = String(now.getHours()).padStart(2,'0');
   const mn = String(now.getMinutes()).padStart(2,'0');
-  const timeStr = h+':'+mn;
+  const timeStr = h+':'+mn; // HH:MM ສັ້ນ
 
   document.getElementById('confirmBtn').textContent = '⏳ ກຳລັງບັນທຶກ...';
   document.getElementById('confirmBtn').disabled = true;
@@ -864,6 +867,22 @@ async function confirmDelivery() {
 
   document.getElementById('confirmBtn').textContent = '✅ ຢືນຢັນຈັດສົ່ງ';
   document.getElementById('confirmBtn').disabled = false;
+}
+
+function cancelScan() {
+  // Reset ທຸກຢ່າງ ກັບໄປຄົ້ນຫາໃໝ່
+  foundData = null;
+  document.getElementById('foundCard').classList.remove('show');
+  document.getElementById('deliveryForm').classList.remove('show');
+  document.getElementById('manualFn').value = '';
+  document.getElementById('manualLn').value = '';
+  document.getElementById('manualInput').style.display = 'none';
+  document.getElementById('proxyName').value = '';
+  document.getElementById('proxyName').classList.remove('show');
+  selectRecipient('self');
+  stopQR();
+  // Scroll ຂຶ້ນເທິງ
+  document.getElementById('tab-scan').scrollTop = 0;
 }
 
 async function markProblem() {
@@ -957,7 +976,7 @@ function showOverduePopup(total,c60,c30,c15) {
     var col=c.days>60?'#dc2626':c.days>30?'#ea580c':'#ca8a04';
     rows+='<div style="display:flex;justify-content:space-between;padding:6px 8px;margin-bottom:3px;background:'+bg+';border-radius:7px;">'+
       '<span style="font-size:12px;font-weight:600;color:#1f2937;">'+ic+' '+c.firstName+' '+c.lastName+'<\/span>'+
-      '<span style="font-size:11px;font-weight:800;color:'+col+';margin-left:6px;white-space:nowrap;">'+c.days+' ວັນ<\/span><\/div>';
+      '<span style="font-size:11px;font-weight:800;color:'+col+';margin-left:6px;white-space:nowrap;">'+shortDate(c.date||'')+' · '+c.days+' ວັນ<\/span><\/div>';
   }
   if(allOverdue.length>15)rows+='<div style="text-align:center;font-size:11px;color:#6b7280;padding:5px;">...ອີກ '+(allOverdue.length-15)+' ຄົນ<\/div>';
   ov.innerHTML='<div style="background:white;border-radius:22px;width:100%;max-width:390px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:popIn 0.3s ease;">'+
@@ -1033,8 +1052,12 @@ function shortTime(t) {
   if (!t) return '';
   t = t.toString().trim();
   // HH:MM:SS → HH:MM
-  const m = t.match(/^(\d{2}:\d{2})/);
-  return m ? m[1] : t;
+  const m = t.match(/^(\d{1,2}:\d{2})/);
+  if (m) return m[1].padStart(5,'0');
+  // Google Sheets Date object value
+  const dm = t.match(/Date\(\d+,\d+,\d+,(\d+),(\d+)/);
+  if (dm) return dm[1].padStart(2,'0')+':'+dm[2].padStart(2,'0');
+  return t;
 }
 
 // ====== NORMALIZE ======
