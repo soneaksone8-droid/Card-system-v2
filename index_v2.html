@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>ລະບົບກວດສອບສະຖານະບັດປະຈຳຕົວດີຈິຕ້ອນ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#003087;--gold:#FFD700;--white:#fff;--gray:#6b7280;--success:#059669;--warning:#d97706;--danger:#dc2626;--info:#2563eb;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans Lao',sans-serif;background:linear-gradient(160deg,#001f5e 0%,#003087 45%,#1a5276 70%,#c8102e 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+.header{width:100%;background:rgba(0,0,0,0.35);backdrop-filter:blur(12px);padding:14px 18px;display:flex;align-items:center;gap:14px;border-bottom:2px solid var(--gold);}
+.logo{width:58px;height:58px;border-radius:50%;border:2px solid var(--gold);background:white;overflow:hidden;flex-shrink:0;box-shadow:0 0 12px rgba(255,215,0,0.4);}
+.logo img{width:100%;height:100%;object-fit:cover;}
+.header-text h1{color:var(--white);font-size:13px;font-weight:700;line-height:1.5;}
+.header-text p{color:var(--gold);font-size:10.5px;margin-top:2px;opacity:0.9;}
+.main{flex:1;width:100%;max-width:460px;padding:18px 14px;display:flex;flex-direction:column;gap:12px;}
+.notice{background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.5);border-radius:12px;padding:11px 13px;display:flex;gap:9px;align-items:flex-start;}
+.notice p{color:var(--gold);font-size:11.5px;line-height:1.7;}
+.card{background:var(--white);border-radius:20px;padding:20px 18px;box-shadow:0 12px 40px rgba(0,0,0,0.25);}
+.card-title{font-size:16px;font-weight:700;color:var(--primary);text-align:center;margin-bottom:16px;}
+.input-group{margin-bottom:12px;}
+.input-group label{display:block;font-size:12.5px;font-weight:600;color:var(--primary);margin-bottom:4px;}
+.input-group label span{color:var(--danger);}
+.input-group input{width:100%;padding:12px 13px;border:2px solid #e5e7eb;border-radius:10px;font-size:15px;font-family:'Noto Sans Lao',sans-serif;transition:all 0.2s;}
+.input-group input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,48,135,0.08);}
+.input-group input.err{border-color:var(--danger);}
+.err-msg{font-size:11px;color:var(--danger);margin-top:3px;display:none;}
+.err-msg.show{display:block;}
+.btn{width:100%;padding:14px;background:linear-gradient(135deg,#003087,#0052cc);color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;transition:all 0.3s;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 15px rgba(0,48,135,0.3);}
+.btn:active{transform:scale(0.98);}
+.btn:disabled{opacity:0.7;cursor:not-allowed;}
+.popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+.popup-overlay.show{display:flex;animation:fadeIn 0.2s ease;}
+.result-popup{background:white;border-radius:24px;width:100%;max-width:380px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.4);animation:slideUp 0.3s ease;}
+.result-header{padding:28px 24px 20px;text-align:center;}
+.result-header.success{background:linear-gradient(135deg,#059669,#047857);}
+.result-header.pending{background:linear-gradient(135deg,#d97706,#b45309);}
+.result-header.delivered{background:linear-gradient(135deg,#2563eb,#1d4ed8);}
+.result-header.error{background:linear-gradient(135deg,#dc2626,#b91c1c);}
+.result-icon{font-size:52px;margin-bottom:8px;}
+.result-status{color:white;font-size:18px;font-weight:700;line-height:1.3;}
+.result-body{padding:20px 22px;}
+.result-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f3f4f6;}
+.result-row:last-child{border:none;}
+.result-label{font-size:12px;color:var(--gray);}
+.result-value{font-size:13px;font-weight:700;color:#1f2937;text-align:right;max-width:65%;}
+.result-note{background:#f9fafb;border-radius:10px;padding:12px;margin-top:4px;font-size:12px;color:var(--gray);text-align:center;line-height:1.6;}
+.btn-close{width:100%;padding:14px;border:none;border-radius:0 0 24px 24px;font-size:15px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;color:white;}
+.btn-close.success{background:#059669;}
+.btn-close.pending{background:#d97706;}
+.btn-close.delivered{background:#2563eb;}
+.btn-close.error{background:#dc2626;}
+.footer{padding:14px;text-align:center;color:rgba(255,255,255,0.5);font-size:10.5px;line-height:1.8;}
+.spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">
+    <img src="https://soneaksone8-droid.github.io/Card-system/logo.png" onerror="this.parentElement.innerHTML='<div style=font-size:30px;text-align:center;line-height:58px>🚔</div>'">
+  </div>
+  <div class="header-text">
+    <h1>ລະບົບກວດສອບສະຖານະບັດປະຈຳຕົວດີຈິຕ້ອນ</h1>
+    <p>ກອງບັນຊາການ ປກສ ເມືອງເຊບັ້ງໄຟ ແຂວງຄຳມ່ວນ</p>
+  </div>
+</div>
+
+<div class="main">
+  <div class="notice">
+    <div style="font-size:16px;flex-shrink:0;margin-top:1px;">⚠️</div>
+    <p>ກວດສອບໄດ້ສະເພາະບຸກຄົນທີ່ດຳເນີນການຢູ່ <strong>ປກສ ເມືອງເຊບັ້ງໄຟ</strong> ເທົ່ານັ້ນ.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔍 ກວດສອບສະຖານະບັດ</div>
+    <div class="input-group">
+      <label>ຊື່ <span>*</span></label>
+      <input type="text" id="firstName" placeholder="ພິມຊື່..." oninput="clearErr('fnErr')" onblur="applyNorm('firstName')">
+      <div class="err-msg" id="fnErr">⚠️ ກະລຸນາພິມຊື່</div>
+    </div>
+    <div class="input-group">
+      <label>ນາມສະກຸນ <span>*</span></label>
+      <input type="text" id="lastName" placeholder="ພິມນາມສະກຸນ..." oninput="clearErr('lnErr')" onblur="applyNorm('lastName')">
+      <div class="err-msg" id="lnErr">⚠️ ກະລຸນາພິມນາມສະກຸນ</div>
+    </div>
+    <button class="btn" id="searchBtn" onclick="doSearch()">
+      <span id="btnText">🔍 ກວດສອບ</span>
+    </button>
+  </div>
+</div>
+
+<div class="footer">
+  📍 ຮັບບັດທີ່ໜ່ວຍງານອອກບັດ ຫ້ອງເບີ 1<br>
+  <a href="tel:02095357594" style="color:rgba(255,215,0,0.8);text-decoration:none;font-weight:700;">📞 020 9535 7594</a>
+  <span style="opacity:0.4;margin:0 6px;">|</span>
+  <a href="tel:02099359871" style="color:rgba(255,215,0,0.8);text-decoration:none;font-weight:700;">020 9935 9871</a><br>
+  ສ້າງໂດຍ: ຮອ ອັກສອນ ອ່ອນແສງເພັດ<br>
+  © 2026 ກອງບັນຊາການ ປກສ ເມືອງເຊບັ້ງໄຟ ແຂວງຄຳມ່ວນ
+</div>
+
+<div class="popup-overlay" id="resultPopup" onclick="closeResult(event)">
+  <div class="result-popup">
+    <div class="result-header" id="rHeader">
+      <div class="result-icon" id="rIcon"></div>
+      <div class="result-status" id="rStatus"></div>
+    </div>
+    <div class="result-body">
+      <div class="result-row"><span class="result-label">ຊື່-ນາມສະກຸນ</span><span class="result-value" id="rName"></span></div>
+      <div class="result-row"><span class="result-label">ສະຖານະ</span><span class="result-value" id="rStat"></span></div>
+      <div class="result-note" id="rNote"></div>
+    </div>
+    <button class="btn-close" id="rCloseBtn" onclick="closeResult()">ປິດ</button>
+  </div>
+</div>
+
+<script>
+const APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbxHLR4Ba3toWa4JL6PMvK1oZ70Pjz5596BMEEEThWEYV-qj-wdlLyCSw5d3Zp6c7HM/exec';
+const CLIENT_ID = 'pub_' + Math.random().toString(36).substr(2,9);
+
+function normalize(t) {
+  if (!t) return '';
+  t = t.trim().replace(/^(ທ້າວ|ນາງສາວ|ນາງ|ທ\.?)\s*/u, '');
+  t = t.replace(/ຫນ/g,'ໜ').replace(/ຫມ/g,'ໝ').replace(/ຫລ/g,'ຫຼ');
+  return t.trim();
+}
+
+function applyNorm(id) {
+  document.getElementById(id).value = normalize(document.getElementById(id).value);
+}
+
+function clearErr(id) {
+  document.getElementById(id).classList.remove('show');
+  const inp = id==='fnErr'?'firstName':'lastName';
+  document.getElementById(inp).classList.remove('err');
+}
+
+function playResultSound(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const sounds = {
+      success: [[800,0],[1200,0.15]],
+      pending: [[600,0]],
+      delivered: [[600,0],[800,0.15],[1000,0.3]],
+      error: [[300,0],[250,0.2]]
+    };
+    (sounds[type]||sounds.pending).forEach(([freq,delay]) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq; o.type = 'sine';
+      g.gain.setValueAtTime(0.8, ctx.currentTime+delay);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+delay+0.25);
+      o.start(ctx.currentTime+delay); o.stop(ctx.currentTime+delay+0.25);
+    });
+  } catch(e) {}
+}
+
+async function doSearch() {
+  let fn = normalize(document.getElementById('firstName').value);
+  let ln = normalize(document.getElementById('lastName').value);
+
+  let err = false;
+  if (!fn) { document.getElementById('fnErr').classList.add('show'); document.getElementById('firstName').classList.add('err'); err=true; }
+  if (!ln) { document.getElementById('lnErr').classList.add('show'); document.getElementById('lastName').classList.add('err'); err=true; }
+  if (err) return;
+
+  document.getElementById('firstName').value = fn;
+  document.getElementById('lastName').value = ln;
+
+  const btn = document.getElementById('searchBtn');
+  document.getElementById('btnText').innerHTML = '<div class="spinner"></div>';
+  btn.disabled = true;
+
+  try {
+    const params = new URLSearchParams({action:'search', fn, ln, clientId: CLIENT_ID});
+    const res = await fetch(APPS_SCRIPT + '?' + params.toString());
+    const data = await res.json();
+
+    if (data.status === 'error') {
+      showResult(null, fn, ln, data.message);
+    } else if (!data.found) {
+      showResult(null, fn, ln, '');
+    } else {
+      showResult(data, fn, ln, '');
+    }
+
+    // Log for admin counter
+    try {
+      fetch(APPS_SCRIPT, {
+        method:'POST', mode:'no-cors',
+        body: JSON.stringify({action:'log',user:'PUBLIC',event:'SEARCH',detail: data.found?'FOUND':'NOT_FOUND'})
+      });
+    } catch(e) {}
+
+  } catch(e) {
+    alert('❌ ເກີດຂໍ້ຜິດພາດ ກະລຸນາລອງໃໝ່');
+  }
+
+  document.getElementById('btnText').textContent = '🔍 ກວດສອບ';
+  btn.disabled = false;
+}
+
+function showResult(found, fn, ln, errMsg) {
+  let type, icon, status, note;
+
+  if (!found) {
+    type='pending'; icon='⏳'; status='ຢູ່ໃນຂະບວນການ';
+    note = errMsg || 'ກະລຸນາລໍຖ້າການແຈ້ງການ ຫຼື ກວດຊື່ໃຫ້ຖືກຕ້ອງ';
+    document.getElementById('rName').textContent = fn&&ln ? fn+' '+ln : '-';
+    document.getElementById('rStat').textContent = 'ຍັງບໍ່ແລ້ວ';
+  } else {
+    document.getElementById('rName').textContent = found.firstName + ' ' + found.lastName;
+    document.getElementById('rStat').textContent = found.status;
+    if (found.status.includes('ຈັດສົ່ງສຳເລັດ')) {
+      type='delivered'; icon='📦'; status='ຈັດສົ່ງສຳເລັດແລ້ວ';
+      note='ບັດຂອງທ່ານໄດ້ຮັບການຈັດສົ່ງສຳເລັດແລ້ວ';
+    } else if (found.status.includes('ພີມບັດສຳເລັດ')) {
+      type='success'; icon='✅'; status='ບັດພ້ອມ! ເຂົ້າຮັບໄດ້ເລີຍ';
+      note='📍 ກະລຸນານຳເອກະສານຢືນຢັນຕົວຕົນ · ໜ່ວຍງານບັດ ຫ້ອງ 1';
+    } else if (found.status.includes('ບັດມີບັນຫາ')) {
+      type='error'; icon='❌'; status='ບັດມີບັນຫາ';
+      note='ກະລຸນາຕິດຕໍ່ ປກສ ເຊບັ້ງໄຟ ໂດຍກົງ';
+    } else {
+      type='pending'; icon='⏳'; status='ຢູ່ໃນຂະບວນການ'; note='';
+    }
+  }
+
+  document.getElementById('rHeader').className = 'result-header ' + type;
+  document.getElementById('rIcon').textContent = icon;
+  document.getElementById('rStatus').textContent = status;
+  document.getElementById('rNote').textContent = note;
+  document.getElementById('rCloseBtn').className = 'btn-close ' + type;
+  document.getElementById('resultPopup').classList.add('show');
+  playResultSound(type);
+}
+
+function closeResult(e) {
+  if (e && e.target !== document.getElementById('resultPopup')) return;
+  document.getElementById('resultPopup').classList.remove('show');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+  if (e.key === 'Escape') document.getElementById('resultPopup').classList.remove('show');
+});
+</script>
+</body>
+</html>
