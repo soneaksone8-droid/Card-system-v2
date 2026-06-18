@@ -49,9 +49,9 @@ body{font-family:'Noto Sans Lao',sans-serif;background:var(--light);min-height:1
 /* TABS */
 .tabs{display:flex;overflow-x:auto;background:linear-gradient(135deg,#001f5e,#003087);border-bottom:2px solid var(--gold);-webkit-overflow-scrolling:touch;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
 .tabs::-webkit-scrollbar{display:none;}
-.tab-btn{padding:10px 12px;border:none;background:transparent;font-size:10.5px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;color:rgba(255,255,255,0.6);cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all 0.2s;letter-spacing:0.3px;}
-.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(255,215,0,0.1);text-shadow:0 0 8px rgba(255,215,0,0.5);}
-.tab-btn:hover:not(.active){color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.05);}
+.tab-btn{padding:10px 12px;border:none;background:transparent;font-size:11px;font-weight:900;font-family:'Noto Sans Lao',sans-serif;color:rgba(255,255,255,0.55);cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all 0.25s;letter-spacing:0.3px;text-shadow:0 1px 3px rgba(0,0,0,0.4);}
+.tab-btn.active{color:#FFE44D;border-bottom-color:#FFD700;background:rgba(255,215,0,0.12);text-shadow:0 0 12px rgba(255,215,0,0.8),0 2px 4px rgba(0,0,0,0.5),0 -1px 0 rgba(255,255,255,0.2);filter:drop-shadow(0 0 6px rgba(255,215,0,0.4));}
+.tab-btn:hover:not(.active){color:rgba(255,255,255,0.9);background:rgba(255,255,255,0.06);text-shadow:0 0 8px rgba(255,255,255,0.3);}
 .tab-badge{background:var(--danger);color:white;border-radius:10px;padding:1px 5px;font-size:9px;margin-left:3px;box-shadow:0 0 6px rgba(220,38,38,0.6);}
 /* CONTENT */
 .content{flex:1;padding:14px;overflow-y:auto;}
@@ -266,6 +266,7 @@ canvas{display:none;}
         <!-- Found Card -->
         <div class="found-card" id="foundCard">
           <div class="found-name" id="foundName"></div>
+          <div id="foundDOB" style="font-size:12px;color:#2563eb;font-weight:700;margin:4px 0 2px;display:none;">🎂 ວັນເດືອນປີເກີດ: <span id="foundDOBVal"></span></div>
           <div class="found-meta" id="foundMeta"></div>
         </div>
 
@@ -346,6 +347,26 @@ canvas{display:none;}
 <div class="ov-popup" id="ovPopup"></div>
 
 <!-- POPUP -->
+<!-- PROBLEM MODAL -->
+<div class="popup-overlay" id="problemModal">
+  <div class="popup-box" style="max-width:400px;">
+    <div class="popup-header warning" style="padding:20px 20px 14px;">
+      <div class="popup-icon">⚠️</div>
+      <div class="popup-title">ໝາຍ "ບັດມີບັນຫາ"</div>
+    </div>
+    <div class="popup-body" style="padding:16px 18px;">
+      <div id="problemPersonName" style="font-size:14px;font-weight:800;color:#1f2937;margin-bottom:12px;text-align:center;"></div>
+      <div style="font-size:12px;font-weight:700;color:#d97706;margin-bottom:6px;">📝 ເຫດຜົນທີ່ມີບັນຫາ <span style="color:#dc2626;">*</span></div>
+      <textarea id="problemReason" rows="3" placeholder="ກະລຸນາລະບຸເຫດຜົນ..." style="width:100%;padding:10px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px;font-family:'Noto Sans Lao',sans-serif;resize:none;outline:none;" oninput="this.style.borderColor=this.value.trim()?'#059669':'#e5e7eb'"></textarea>
+      <div id="problemReasonErr" style="color:#dc2626;font-size:11px;margin-top:4px;display:none;">❌ ກະລຸນາໃສ່ເຫດຜົນ ລະບົບບໍ່ສາມາດບັນທຶກໄດ້</div>
+    </div>
+    <div style="display:flex;gap:8px;padding:0 18px 16px;">
+      <button onclick="closeProblemModal()" style="flex:1;padding:12px;background:#f3f4f6;border:none;border-radius:10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;color:#6b7280;">ຍົກເລີກ</button>
+      <button onclick="submitProblem()" style="flex:1;padding:12px;background:linear-gradient(135deg,#d97706,#b45309);border:none;border-radius:10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;color:white;">✅ ຢືນຢັນ</button>
+    </div>
+  </div>
+</div>
+
 <div class="popup-overlay" id="popup">
   <div class="popup-box">
     <div class="popup-header success" id="popHeader">
@@ -631,11 +652,23 @@ function showFoundCard(card, fn, ln, errMsg) {
   if (!card) {
     document.getElementById('foundName').textContent = errMsg ? errMsg : '❌ ບໍ່ພົບ: '+fn+' '+ln;
     document.getElementById('foundMeta').textContent = errMsg ? 'ກະລຸນາຕິດຕໍ່ຜູ້ດູແລລະບົບ' : 'ກວດຊື່ຄືນໃໝ່ ຫຼື ບໍ່ມີໃນລະບົບ';
+    document.getElementById('foundDOB').style.display = 'none';
     foundData = null;
     return;
   }
 
   document.getElementById('foundName').textContent = card.firstName+' '+card.lastName;
+
+  // Show DOB
+  const dobEl = document.getElementById('foundDOB');
+  const dobVal = document.getElementById('foundDOBVal');
+  if (card.dob) {
+    dobVal.textContent = card.dob;
+    dobEl.style.display = 'block';
+  } else {
+    dobEl.style.display = 'none';
+  }
+
   let statusClass = 'status-ready';
   let statusText = card.status;
   if (card.status.includes('ຈັດສົ່ງສຳເລັດ')) statusClass='status-delivered';
@@ -885,6 +918,7 @@ function cancelScan() {
   foundData = null;
   document.getElementById('foundCard').classList.remove('show');
   document.getElementById('deliveryForm').classList.remove('show');
+  document.getElementById('foundDOB').style.display = 'none';
   document.getElementById('manualFn').value = '';
   document.getElementById('manualLn').value = '';
   document.getElementById('manualInput').style.display = 'none';
@@ -892,43 +926,44 @@ function cancelScan() {
   document.getElementById('proxyName').classList.remove('show');
   selectRecipient('self');
   stopQR();
-  // Scroll ຂຶ້ນເທິງ
   document.getElementById('tab-scan').scrollTop = 0;
 }
 
-async function markProblem() {
+function markProblem() {
   if (!foundData) return;
+  // Show custom modal
+  document.getElementById('problemPersonName').textContent = '👤 '+foundData.firstName+' '+foundData.lastName+(foundData.dob?' · 🎂 '+foundData.dob:'');
+  document.getElementById('problemReason').value = '';
+  document.getElementById('problemReason').style.borderColor = '#e5e7eb';
+  document.getElementById('problemReasonErr').style.display = 'none';
+  document.getElementById('problemModal').classList.add('show');
+}
 
-  // ບັງຄັບໃສ່ເຫດຜົນ
-  const reason = prompt('⚠️ ໝາຍ "ບັດມີບັນຫາ" ສຳລັບ: '+foundData.firstName+' '+foundData.lastName+'\n\nກະລຸນາລະບຸເຫດຜົນທີ່ມີບັນຫາ:');
+function closeProblemModal() {
+  document.getElementById('problemModal').classList.remove('show');
+}
 
-  // ຖ້າກົດ Cancel ຫຼື ບໍ່ໃສ່ເຫດຜົນ
-  if (reason === null) return; // ກົດ Cancel
-  if (!reason.trim()) {
-    alert('❌ ກະລຸນາໃສ່ເຫດຜົນ ລະບົບບໍ່ສາມາດບັນທຶກໄດ້ຖ້າບໍ່ມີເຫດຜົນ');
+async function submitProblem() {
+  const reason = document.getElementById('problemReason').value.trim();
+  if (!reason) {
+    document.getElementById('problemReasonErr').style.display = 'block';
+    document.getElementById('problemReason').style.borderColor = '#dc2626';
+    document.getElementById('problemReason').focus();
     return;
   }
-
+  closeProblemModal();
   try {
     await fetch(APPS, {
       method:'POST', mode:'no-cors',
       body: JSON.stringify({
-        action:'problem',
-        token: userToken,
-        firstName: foundData.firstName,
-        lastName: foundData.lastName,
-        staff: currentUser.name,
-        reason: reason.trim()
+        action:'problem', token:userToken,
+        firstName:foundData.firstName, lastName:foundData.lastName,
+        staff:currentUser.name, reason:reason
       })
     });
   } catch(e) {}
-
-  showPopup('⚠️','ໝາຍສຳເລັດ',
-    foundData.firstName+' '+foundData.lastName+
-    '\nໝາຍເປັນ "ບັດມີບັນຫາ"'+
-    '\n📝 ເຫດຜົນ: '+reason.trim(),
-    'warning'
-  );
+  const pmsg = foundData.firstName+' '+foundData.lastName+' ໝາຍເປັນ "ບັດມີບັນຫາ" 📝 '+reason;
+  showPopup('⚠️','ໝາຍສຳເລັດ!', pmsg, 'warning');
   document.getElementById('foundCard').classList.remove('show');
   document.getElementById('deliveryForm').classList.remove('show');
   foundData = null;
