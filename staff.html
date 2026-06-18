@@ -675,7 +675,7 @@ async function searchManual() {
 }
 
 async function searchCard(fn, ln, dob) {
-  // ຂັ້ນ 1: ຄົ້ນຫາດ້ວຍ ຊື່+ນາມ
+  // ຄົ້ນຫາດ້ວຍ ຊື່+ນາມ
   const matched = allCards.filter(c =>
     normalize(c.firstName)===fn && normalize(c.lastName)===ln
   );
@@ -685,34 +685,51 @@ async function searchCard(fn, ln, dob) {
     return;
   }
 
-  // ຂັ້ນ 2: ຖ້າພົບຫຼາຍຄົນ → ກວດ ວັນເກີດ
-  if (matched.length > 1 && dob) {
+  // ຖ້າມີ DOB → ໃຊ້ DOB ກວດຊ່ວຍທຸກກໍລະນີ (ຄົນດຽວ ຫຼື ຫຼາຍຄົນ)
+  if (dob) {
     const dobFormatted = convertDOB(dob);
-    const exactMatch = matched.filter(c => {
+    const dobMatched = matched.filter(c => {
       const cd = (c.dob || '').toString().trim();
-      return cd === dobFormatted || cd === dob;
+      // ທຽບຫຼາຍ format: DD/MM/YYYY, DD/MM/YY, DDMMYYYY
+      return cd === dobFormatted ||
+             cd === dob ||
+             convertDOB(cd) === dobFormatted ||
+             convertDOB(cd) === dob;
     });
 
-    if (exactMatch.length === 1) {
-      foundData = exactMatch[0];
-      showFoundCard(exactMatch[0], fn, ln);
+    if (dobMatched.length === 1) {
+      // ພົບຄົນດຽວ DOB ຕົງ → ສະແດງ
+      foundData = dobMatched[0];
+      showFoundCard(dobMatched[0], fn, ln);
       return;
     }
 
-    if (exactMatch.length > 1) {
-      showFoundCard(null, fn, ln, '⚠️ ຂໍ້ມູນຊ້ຳກັນ ກະລຸນາແຈ້ງຜູ້ດູແລລະບົບ');
+    if (dobMatched.length > 1) {
+      // ຊ້ຳທຸກຢ່າງ
+      showFoundCard(null, fn, ln, '⚠️ ຂໍ້ມູນຊ້ຳກັນທຸກຢ່າງ ກະລຸນາແຈ້ງຜູ້ດູແລ');
       return;
     }
 
-    // DOB ບໍ່ຕົງ → ໃຊ້ຄົນທຳອິດ
-    foundData = matched[0];
-    showFoundCard(matched[0], fn, ln);
+    // DOB ບໍ່ຕົງໃຜ → ກໍລະນີຂໍ້ມູນ Format ຕ່າງ
+    // ໃຊ້ matched ທຳອິດ ແຕ່ສະແດງ warning
+    if (matched.length === 1) {
+      foundData = matched[0];
+      showFoundCard(matched[0], fn, ln);
+    } else {
+      // ຫຼາຍຄົນ DOB ບໍ່ຕົງ → ແຈ້ງ
+      showFoundCard(null, fn, ln, '⚠️ ພົບ '+matched.length+' ຄົນ ຊ້ຳຊື່ ແຕ່ DOB ບໍ່ຕົງ ກະລຸນາກວດຊ້ຳ');
+    }
     return;
   }
 
-  // ຂັ້ນ 3: ພົບຄົນດຽວ → ສະແດງທັນທີ
-  foundData = matched[0];
-  showFoundCard(matched[0], fn, ln);
+  // ບໍ່ມີ DOB (ພິມຊື່ດ້ວຍໂຕ)
+  if (matched.length === 1) {
+    foundData = matched[0];
+    showFoundCard(matched[0], fn, ln);
+  } else {
+    // ຊ້ຳ ແຕ່ບໍ່ຮູ້ DOB → ແຈ້ງໃຫ້ສະແກນ QR
+    showFoundCard(null, fn, ln, '⚠️ ພົບ '+matched.length+' ຄົນຊື່ຄືກັນ - ກະລຸນາ ສະແກນ QR ເພື່ອລະບຸຕົວຕົນ');
+  }
 }
 
 function convertDOB(raw) {
