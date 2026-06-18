@@ -114,23 +114,23 @@ canvas{display:none;}
 .filter-btn{flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;border:2px solid;}
 /* SAVING */
 /* PENDING ITEMS */
-.pend-item{background:white;border-radius:14px;padding:13px 14px;margin-bottom:8px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border-left:4px solid #d97706;display:flex;align-items:center;gap:10px;transition:all 0.2s;}
-.pend-item.overdue-red{border-left-color:#dc2626;background:linear-gradient(135deg,#fff5f5,#fff);}
-.pend-item.overdue-orange{border-left-color:#ea580c;background:linear-gradient(135deg,#fff8f0,#fff);}
-.pend-item.overdue-yellow{border-left-color:#ca8a04;background:linear-gradient(135deg,#fffdf0,#fff);}
-.pend-item.normal{border-left-color:#2563eb;background:linear-gradient(135deg,#f0f7ff,#fff);}
+.pend-item{background:white;border-radius:10px;padding:11px 13px;margin-bottom:5px;border:1px solid #e5e7eb;display:flex;align-items:center;gap:11px;transition:all 0.15s;}
+.pend-item.overdue-red{border-left:3px solid #dc2626;}
+.pend-item.overdue-orange{border-left:3px solid #ea580c;}
+.pend-item.overdue-yellow{border-left:3px solid #ca8a04;}
+.pend-item.normal{border-left:3px solid #93c5fd;}
 .pend-info{flex:1;min-width:0;}
 .pend-name{font-size:13px;font-weight:800;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .pend-sub{font-size:11px;color:#6b7280;margin-top:2px;}
 .pend-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
-.days-badge{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:900;white-space:nowrap;}
-.days-red{background:#dc2626;color:white;box-shadow:0 2px 6px rgba(220,38,38,0.4);}
-.days-orange{background:#ea580c;color:white;box-shadow:0 2px 6px rgba(234,88,12,0.4);}
-.days-yellow{background:#ca8a04;color:white;box-shadow:0 2px 6px rgba(202,138,4,0.4);}
-.days-blue{background:#2563eb;color:white;box-shadow:0 2px 6px rgba(37,99,235,0.3);}
-.days-green{background:#059669;color:white;box-shadow:0 2px 6px rgba(5,150,105,0.3);}
+.days-badge{padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700;white-space:nowrap;}
+.days-red{background:#fee2e2;color:#b91c1c;}
+.days-orange{background:#fff7ed;color:#c2410c;}
+.days-yellow{background:#fefce8;color:#a16207;}
+.days-blue{background:#eff6ff;color:#1d4ed8;}
+.days-green{background:#f0fdf4;color:#166534;}
 .btn-quick-deliver{background:linear-gradient(135deg,#059669,#047857);color:white;border:2px solid #FFD700;border-radius:20px;padding:7px 14px;font-size:10px;font-weight:800;font-family:inherit;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(5,150,105,0.35),0 0 0 1px rgba(255,215,0,0.3);transition:all 0.2s;letter-spacing:0.3px;}
-.btn-quick-deliver:active{transform:scale(0.95);box-shadow:0 1px 4px rgba(5,150,105,0.3);}
+.btn-quick-deliver:active{transform:scale(0.97);}
 
 /* PWA INSTALL BANNER */
 .install-banner{display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#003087,#0052cc);padding:12px 16px;z-index:300;box-shadow:0 -4px 20px rgba(0,0,0,0.3);border-top:2px solid var(--gold);}
