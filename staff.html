@@ -735,7 +735,8 @@ async function searchCard(fn, ln, dob) {
 function convertDOB(raw) {
   if (!raw) return '';
   raw = raw.toString().trim();
-  // DDMMYYYY → DD/MM/YYYY
+
+  // DDMMYYYY (no separator) → DD/MM/YYYY
   if (/^\d{8}$/.test(raw)) {
     return raw.substring(0,2)+'/'+raw.substring(2,4)+'/'+raw.substring(4,8);
   }
@@ -743,6 +744,19 @@ function convertDOB(raw) {
   if (/^\d{6}$/.test(raw)) {
     return raw.substring(0,2)+'/'+raw.substring(2,4)+'/20'+raw.substring(4,6);
   }
+  // Normalize separators: - or . → /
+  // DD-MM-YYYY or DD.MM.YYYY → DD/MM/YYYY
+  raw = raw.replace(/-/g, '/').replace(/\./g, '/');
+
+  // DD/MM/YYYY → keep
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(raw)) return raw;
+
+  // DD/MM/YY → DD/MM/20YY
+  if (/^\d{1,2}\/\d{1,2}\/\d{2}$/.test(raw)) {
+    const p = raw.split('/');
+    return p[0].padStart(2,'0')+'/'+p[1].padStart(2,'0')+'/20'+p[2];
+  }
+
   return raw;
 }
 
