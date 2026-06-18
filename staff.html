@@ -47,11 +47,12 @@ body{font-family:'Noto Sans Lao',sans-serif;background:var(--light);min-height:1
 .counter-total{text-align:right;font-size:10px;color:rgba(255,255,255,0.6);}
 .counter-total span{color:var(--gold);font-weight:800;font-size:14px;}
 /* TABS */
-.tabs{display:flex;overflow-x:auto;background:white;border-bottom:2px solid #e5e7eb;-webkit-overflow-scrolling:touch;}
+.tabs{display:flex;overflow-x:auto;background:linear-gradient(135deg,#001f5e,#003087);border-bottom:2px solid var(--gold);-webkit-overflow-scrolling:touch;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
 .tabs::-webkit-scrollbar{display:none;}
-.tab-btn{padding:10px 14px;border:none;background:transparent;font-size:11px;font-weight:600;font-family:'Noto Sans Lao',sans-serif;color:var(--gray);cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all 0.2s;}
-.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary);background:#f0f4ff;}
-.tab-badge{background:var(--danger);color:white;border-radius:10px;padding:1px 5px;font-size:9px;margin-left:3px;}
+.tab-btn{padding:10px 12px;border:none;background:transparent;font-size:10.5px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;color:rgba(255,255,255,0.6);cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all 0.2s;letter-spacing:0.3px;}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(255,215,0,0.1);text-shadow:0 0 8px rgba(255,215,0,0.5);}
+.tab-btn:hover:not(.active){color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.05);}
+.tab-badge{background:var(--danger);color:white;border-radius:10px;padding:1px 5px;font-size:9px;margin-left:3px;box-shadow:0 0 6px rgba(220,38,38,0.6);}
 /* CONTENT */
 .content{flex:1;padding:14px;overflow-y:auto;}
 .tab-panel{display:none;}
@@ -204,11 +205,11 @@ canvas{display:none;}
   </div>
 
   <div class="tabs" id="tabBar">
-    <button class="tab-btn active" onclick="switchTab('scan')">📷 ຈັດສົ່ງ</button>
-    <button class="tab-btn" onclick="switchTab('pending')">⏳ ລໍຖ້າ</button>
-    <button class="tab-btn" onclick="switchTab('history')">✅ ສຳເລັດ</button>
-    <button class="tab-btn" onclick="switchTab('problems')">❌ ບັນຫາ</button>
-    <button class="tab-btn" id="overdueTab" onclick="switchTab('overdue')">🚨 ຄ້າງດົນ<span class="tab-badge" id="overdueCount" style="display:none">0</span></button>
+    <button class="tab-btn active" onclick="switchTab('scan')">📤 ຈັດສົ່ງບັດ</button>
+    <button class="tab-btn" onclick="switchTab('pending')">⏳ ລໍຖ້າຈັດສົ່ງ</button>
+    <button class="tab-btn" onclick="switchTab('history')">✅ ຈັດສົ່ງສຳເລັດ</button>
+    <button class="tab-btn" onclick="switchTab('problems')">⚠️ ບັດມີບັນຫາ</button>
+    <button class="tab-btn" id="overdueTab" onclick="switchTab('overdue')">🚨 ບັດຄ້າງດົນ<span class="tab-badge" id="overdueCount" style="display:none">0</span></button>
   </div>
 
   <div class="content">
@@ -896,17 +897,41 @@ function cancelScan() {
 }
 
 async function markProblem() {
-  if (!foundData || !confirm('ໝາຍ "ບັດມີບັນຫາ" ສຳລັບ '+foundData.firstName+' '+foundData.lastName+'?')) return;
+  if (!foundData) return;
+
+  // ບັງຄັບໃສ່ເຫດຜົນ
+  const reason = prompt('⚠️ ໝາຍ "ບັດມີບັນຫາ" ສຳລັບ: '+foundData.firstName+' '+foundData.lastName+'\n\nກະລຸນາລະບຸເຫດຜົນທີ່ມີບັນຫາ:');
+
+  // ຖ້າກົດ Cancel ຫຼື ບໍ່ໃສ່ເຫດຜົນ
+  if (reason === null) return; // ກົດ Cancel
+  if (!reason.trim()) {
+    alert('❌ ກະລຸນາໃສ່ເຫດຜົນ ລະບົບບໍ່ສາມາດບັນທຶກໄດ້ຖ້າບໍ່ມີເຫດຜົນ');
+    return;
+  }
+
   try {
     await fetch(APPS, {
       method:'POST', mode:'no-cors',
-      body: JSON.stringify({action:'problem', token:userToken, firstName:foundData.firstName, lastName:foundData.lastName, staff:currentUser.name, reason:''})
+      body: JSON.stringify({
+        action:'problem',
+        token: userToken,
+        firstName: foundData.firstName,
+        lastName: foundData.lastName,
+        staff: currentUser.name,
+        reason: reason.trim()
+      })
     });
   } catch(e) {}
-  showPopup('⚠️','ໝາຍສຳເລັດ',foundData.firstName+' '+foundData.lastName+' ໝາຍເປັນ "ບັດມີບັນຫາ"','warning');
+
+  showPopup('⚠️','ໝາຍສຳເລັດ',
+    foundData.firstName+' '+foundData.lastName+
+    '\nໝາຍເປັນ "ບັດມີບັນຫາ"'+
+    '\n📝 ເຫດຜົນ: '+reason.trim(),
+    'warning'
+  );
   document.getElementById('foundCard').classList.remove('show');
   document.getElementById('deliveryForm').classList.remove('show');
-  foundData=null;
+  foundData = null;
   loadAllData();
 }
 
