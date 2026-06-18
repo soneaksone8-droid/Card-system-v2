@@ -487,7 +487,8 @@ async function loadAllData() {
     if (data.status==='ok') {
       allCards = (data.data || []).map(c => ({
         ...c,
-        date: shortDate(c.date),
+        rawDate: c.date, // Keep raw for getDays calculation
+        date: shortDate(c.date), // DD/MM/YY for display
         dob: c.dob || '',
       }));
       allPending = allCards.filter(c => c.status && c.status.includes('ພີມບັດສຳເລັດ'));
@@ -580,7 +581,7 @@ function filterPending() {
   const el = document.getElementById('pendingList');
   if (!data.length) { el.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:13px;padding:20px;">✅ ບໍ່ມີລາຍການລໍຖ້າ<\/div>'; return; }
   el.innerHTML = data.map(c => {
-    const days = getDays(c.date);
+    const days = getDays(c.rawDate || c.date);
     let cls, bc, txt, ic;
     if (days > 60) { cls='overdue-red'; bc='days-red'; ic='🔴'; txt='🔴 '+days+' ວັນ'; }
     else if (days > 30) { cls='overdue-orange'; bc='days-orange'; ic='🟠'; txt='🟠 '+days+' ວັນ'; }
@@ -1037,7 +1038,7 @@ async function loadOverdueData() {
     const c60 = allPending.filter(c => getDays(c.date)>60).length;
     const c30 = allPending.filter(c => getDays(c.date)>30&&getDays(c.date)<=60).length;
     const c15 = allPending.filter(c => getDays(c.date)>=15&&getDays(c.date)<=30).length;
-    allOverdue = allPending.map(c=>({...c,days:getDays(c.date)})).filter(c=>c.days>=15).sort((a,b)=>b.days-a.days);
+    allOverdue = allPending.map(c=>({...c,days:getDays(c.rawDate||c.date)})).filter(c=>c.days>=0&&c.days>=15).sort((a,b)=>b.days-a.days);
     document.getElementById('cnt60').textContent=c60;
     document.getElementById('cnt30').textContent=c30;
     document.getElementById('cnt15').textContent=c15;
@@ -1050,15 +1051,33 @@ async function loadOverdueData() {
 }
 
 function getDays(dateStr) {
-  if (!dateStr) return -1;
-  const p = dateStr.split('/');
-  if (p.length!==3) return -1;
-  const d = new Date(Number(p[2]),Number(p[1])-1,Number(p[0]));
-  if (isNaN(d)) return -1;
-  return Math.floor((new Date()-d)/86400000);
+  if (!dateStr || dateStr === '-') return -1;
+  try {
+    const s = dateStr.toString().trim();
+
+    // Handle long Date string "Wed Jun 17 2026..."
+    if (s.includes('GMT') || s.length > 20) {
+      const dt = new Date(s);
+      if (!isNaN(dt) && dt.getFullYear() > 2000) {
+        return Math.floor((new Date() - dt) / 86400000);
+      }
+      return -1;
+    }
+
+    // DD/MM/YY or DD/MM/YYYY
+    const p = s.split('/');
+    if (p.length === 3) {
+      let yr = Number(p[2]);
+      if (yr < 100) yr += 2000; // 26 → 2026
+      const dt = new Date(yr, Number(p[1])-1, Number(p[0]));
+      if (isNaN(dt) || dt.getFullYear() < 2000) return -1;
+      return Math.floor((new Date() - dt) / 86400000);
+    }
+    return -1;
+  } catch(e) { return -1; }
 }
 
-function isOverdue(dateStr) { return getDays(dateStr)>30; }
+function isOverdue(dateStr) { const d = getDays(dateStr); return d > 0 && d > 30; }
 
 function filterOverdueLevel(lv) {
   overdueLevel=lv;
