@@ -977,6 +977,7 @@ async function confirmDelivery() {
         token: userToken,
         firstName: foundData.firstName,
         lastName: foundData.lastName,
+        dob: foundData.dob || '',
         staff: currentUser.name,
         date: dateStr,
         time: timeStr,
@@ -1030,17 +1031,14 @@ function updateTabCounts() {
 }
 
 function quickDeliver(fn, ln, dob) {
-  // ໄປໜ້າຈັດສົ່ງ + ຕື່ມຊື່ໃສ່ທັນທີ
   switchTab('scan');
-  // ສະແດງ manual input
   document.getElementById('manualInput').style.display = 'block';
   document.getElementById('manualFn').value = fn;
   document.getElementById('manualLn').value = ln;
-  // Scroll ຂຶ້ນ
   document.getElementById('tab-scan').scrollTop = 0;
   window.scrollTo(0, 0);
-  // ຄົ້ນຫາທັນທີ
-  setTimeout(() => searchCard(fn.toLowerCase(), ln.toLowerCase(), dob), 200);
+  // Pass dob for duplicate name matching
+  setTimeout(() => searchCard(fn.toLowerCase(), ln.toLowerCase(), dob || ''), 200);
 }
 
 function cancelScan() {
@@ -1088,6 +1086,7 @@ async function submitProblem() {
       body: JSON.stringify({
         action:'problem', token:userToken,
         firstName:foundData.firstName, lastName:foundData.lastName,
+        dob: foundData.dob || '',
         staff:currentUser.name, reason:reason
       })
     });
