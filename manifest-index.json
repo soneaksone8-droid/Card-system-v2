@@ -1,8 +1,8 @@
 {
-  "name": "ລະບົບຈັດສົ່ງບັດ - ປກສ ເຊບັ້ງໄຟ",
-  "short_name": "ຈັດສົ່ງບັດ",
-  "description": "ລະບົບຈັດສົ່ງບັດປະຈຳຕົວດີຈິຕ້ອນ",
-  "start_url": "https://soneaksone8-droid.github.io/Card-system-v2/staff.html",
+  "name": "ກວດສອບບັດ - ປກສ ເຊບັ້ງໄຟ",
+  "short_name": "ກວດສອບບັດ",
+  "description": "ລະບົບກວດສອບສະຖານະບັດປະຈຳຕົວດີຈິຕ້ອນ",
+  "start_url": "https://soneaksone8-droid.github.io/Card-system-v2/index.html",
   "scope": "https://soneaksone8-droid.github.io/Card-system-v2/",
   "display": "standalone",
   "orientation": "portrait",

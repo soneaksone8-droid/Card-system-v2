@@ -2,6 +2,11 @@
 <html lang="lo">
 <head>
 <meta charset="UTF-8">
+<link rel="manifest" href="manifest-index.json">
+<meta name="theme-color" content="#003087">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ກວດສອບບັດ">
+<link rel="apple-touch-icon" href="logo.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>ລະບົບກວດສອບສະຖານະບັດປະຈຳຕົວດີຈິຕ້ອນ</title>
@@ -248,6 +253,11 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter') doSearch();
   if (e.key === 'Escape') document.getElementById('resultPopup').classList.remove('show');
 });
+</script>
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(e=>console.log(e));
+}
 </script>
 </body>
 </html>

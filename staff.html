@@ -132,6 +132,23 @@ canvas{display:none;}
 .btn-quick-deliver{background:linear-gradient(135deg,#059669,#047857);color:white;border:2px solid #FFD700;border-radius:20px;padding:7px 14px;font-size:10px;font-weight:800;font-family:inherit;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(5,150,105,0.35),0 0 0 1px rgba(255,215,0,0.3);transition:all 0.2s;letter-spacing:0.3px;}
 .btn-quick-deliver:active{transform:scale(0.95);box-shadow:0 1px 4px rgba(5,150,105,0.3);}
 
+/* PWA INSTALL BANNER */
+.install-banner{display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#003087,#0052cc);padding:12px 16px;z-index:300;box-shadow:0 -4px 20px rgba(0,0,0,0.3);border-top:2px solid var(--gold);}
+.install-banner.show{display:flex;align-items:center;gap:12px;animation:slideUp 0.3s ease;}
+.install-banner-icon{width:44px;height:44px;border-radius:10px;overflow:hidden;border:2px solid var(--gold);flex-shrink:0;}
+.install-banner-icon img{width:100%;height:100%;object-fit:cover;}
+.install-banner-text{flex:1;}
+.install-banner-text h3{color:white;font-size:13px;font-weight:800;margin-bottom:2px;}
+.install-banner-text p{color:rgba(255,255,255,0.7);font-size:10px;}
+.install-banner-btns{display:flex;gap:8px;flex-shrink:0;}
+.btn-install{background:linear-gradient(135deg,#FFD700,#FFA500);color:#1a1a1a;border:none;border-radius:10px;padding:8px 14px;font-size:11px;font-weight:900;font-family:inherit;cursor:pointer;}
+.btn-install-later{background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:10px;padding:8px 10px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;}
+/* FINGERPRINT */
+.fp-btn{width:100%;padding:13px;background:linear-gradient(135deg,#1f2937,#374151);color:white;border:2px solid rgba(255,215,0,0.3);border-radius:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.3s;}
+.fp-btn:hover{border-color:var(--gold);background:linear-gradient(135deg,#374151,#4b5563);}
+.fp-btn.fp-success{background:linear-gradient(135deg,#059669,#047857);border-color:#4ade80;}
+.fp-btn.fp-error{background:linear-gradient(135deg,#dc2626,#b91c1c);border-color:#f87171;}
+
 .saving{position:fixed;bottom:20px;right:20px;background:var(--primary);color:white;padding:10px 16px;border-radius:10px;font-size:12px;font-weight:600;display:none;z-index:200;}
 /* SEARCH METHODS */
 .search-methods{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
@@ -195,6 +212,9 @@ canvas{display:none;}
       <input type="password" id="loginPass" placeholder="ພິມ password..." autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <button class="btn-login" onclick="doLogin()" id="loginBtn">🔐 ເຂົ້າສູ່ລະບົບ</button>
+    <button class="fp-btn" id="fpBtn" onclick="fingerprintLogin()" style="display:none;">
+      <span id="fpIcon">👆</span><span id="fpText">ເຂົ້າດ້ວຍລາຍນິ້ວມື</span>
+    </button>
     <div class="login-err" id="loginError">❌ ຊື່ຜູ້ໃຊ້ ຫຼື ລະຫັດຜ່ານຜິດ</div>
   </div>
 </div>
@@ -308,25 +328,7 @@ canvas{display:none;}
     <div class="tab-panel" id="tab-pending">
       <div class="card">
         <div class="card-title">⏳ ລາຍການລໍຖ້າຈັດສົ່ງ</div>
-        <!-- Stats Bar -->
-        <div id="pendStatsBar" style="display:none;background:linear-gradient(135deg,#001f5e,#003087);border-radius:12px;padding:10px 14px;margin-bottom:10px;display:flex;gap:8px;">
-          <div style="flex:1;text-align:center;background:rgba(255,255,255,0.1);border-radius:8px;padding:7px 4px;">
-            <div style="font-size:20px;font-weight:900;color:#FFD700;" id="statPending">-</div>
-            <div style="font-size:9px;color:rgba(255,255,255,0.7);">⏳ ລໍຖ້າ</div>
-          </div>
-          <div style="flex:1;text-align:center;background:rgba(255,255,255,0.1);border-radius:8px;padding:7px 4px;">
-            <div style="font-size:20px;font-weight:900;color:#4ade80;" id="statDone">-</div>
-            <div style="font-size:9px;color:rgba(255,255,255,0.7);">✅ ສຳເລັດ</div>
-          </div>
-          <div style="flex:1;text-align:center;background:rgba(255,255,255,0.1);border-radius:8px;padding:7px 4px;">
-            <div style="font-size:20px;font-weight:900;color:#f87171;" id="statProblem">-</div>
-            <div style="font-size:9px;color:rgba(255,255,255,0.7);">⚠️ ບັນຫາ</div>
-          </div>
-          <div style="flex:1;text-align:center;background:rgba(255,255,255,0.1);border-radius:8px;padding:7px 4px;">
-            <div style="font-size:20px;font-weight:900;color:#fb923c;" id="statOverdue">-</div>
-            <div style="font-size:9px;color:rgba(255,255,255,0.7);">🚨 ຄ້າງດົນ</div>
-          </div>
-        </div>
+
         <button class="btn-primary" onclick="loadPending()">🔄 ໂຫຼດຂໍ້ມູນ</button>
         <input class="search-bar" type="text" id="pendSearch" placeholder="ຄົ້ນຫາຊື່..." oninput="filterPending()">
         <div id="pendingList"><div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">ກົດ "ໂຫຼດຂໍ້ມູນ"</div></div>
@@ -456,6 +458,18 @@ async function doLogin() {
       document.getElementById('topbarUser').textContent = 'ສະບາຍດີ: ' + data.name;
       startLogoutTimer();
       loadAllData();
+      // Save session for fingerprint
+      localStorage.setItem('sbf_session_' + document.getElementById('loginUser').value.trim(), JSON.stringify({
+        name: data.name, role: data.role, token: data.token, time: Date.now()
+      }));
+      // Offer fingerprint registration if not registered
+      setTimeout(async () => {
+        if (window.PublicKeyCredential && !localStorage.getItem(FP_KEY)) {
+          if (confirm('👆 ຕ້ອງການລົງທະບຽນ ລາຍນິ້ວມື ເພື່ອ Login ໄວຂຶ້ນ ຄັ້ງຕໍ່ໄປ?')) {
+            await registerFingerprint(document.getElementById('loginUser').value.trim() || data.name);
+          }
+        }
+      }, 1500);
     } else {
       document.getElementById('loginError').style.display = 'block';
       setTimeout(() => document.getElementById('loginError').style.display='none', 3000);
@@ -1012,17 +1026,7 @@ function updateTabCounts() {
   if (prb) { prb.textContent = problems; prb.style.display = problems > 0 ? 'inline' : 'none'; }
   if (ob) { ob.textContent = overdue; ob.style.display = overdue > 0 ? 'inline' : 'none'; }
 
-  // Update stats bar
-  const sb = document.getElementById('pendStatsBar');
-  if (sb) { sb.style.display = 'flex'; }
-  const sp = document.getElementById('statPending');
-  const sd = document.getElementById('statDone');
-  const spr = document.getElementById('statProblem');
-  const so = document.getElementById('statOverdue');
-  if (sp) sp.textContent = pending;
-  if (sd) sd.textContent = done;
-  if (spr) spr.textContent = problems;
-  if (so) so.textContent = overdue;
+
 }
 
 function quickDeliver(fn, ln, dob) {
@@ -1250,6 +1254,164 @@ function playSuccessSound() {
   }catch(e){}
 }
 
+// ====== PWA INSTALL ======
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show banner after 2 seconds
+  setTimeout(() => {
+    const banner = document.getElementById('installBanner');
+    if (banner && !localStorage.getItem('installDismissed')) {
+      banner.classList.add('show');
+    }
+  }, 2000);
+});
+
+async function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const result = await deferredPrompt.userChoice;
+  if (result.outcome === 'accepted') {
+    document.getElementById('installBanner').classList.remove('show');
+    localStorage.setItem('installDismissed', '1');
+  }
+  deferredPrompt = null;
+}
+
+function dismissInstall() {
+  document.getElementById('installBanner').classList.remove('show');
+  localStorage.setItem('installDismissed', '1');
+}
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').classList.remove('show');
+  deferredPrompt = null;
+});
+
+// ====== FINGERPRINT / BIOMETRIC ======
+const FP_KEY = 'sbf_fp_credential';
+
+async function checkFingerprint() {
+  // Check if WebAuthn supported
+  if (!window.PublicKeyCredential) return;
+  // Check if credential saved
+  const saved = localStorage.getItem(FP_KEY);
+  if (saved) {
+    document.getElementById('fpBtn').style.display = 'flex';
+  }
+}
+
+async function registerFingerprint(username) {
+  if (!window.PublicKeyCredential) return;
+  try {
+    const challenge = new Uint8Array(32);
+    crypto.getRandomValues(challenge);
+    const userId = new TextEncoder().encode(username);
+
+    const cred = await navigator.credentials.create({
+      publicKey: {
+        challenge,
+        rp: { name: 'ລະບົບຈັດສົ່ງບັດ ປກສ ເຊບັ້ງໄຟ', id: location.hostname },
+        user: { id: userId, name: username, displayName: username },
+        pubKeyCredParams: [{ alg: -7, type: 'public-key' }],
+        authenticatorSelection: {
+          authenticatorAttachment: 'platform',
+          userVerification: 'required'
+        },
+        timeout: 60000,
+      }
+    });
+
+    if (cred) {
+      localStorage.setItem(FP_KEY, JSON.stringify({
+        id: Array.from(new Uint8Array(cred.rawId)),
+        username: username
+      }));
+      alert('✅ ລົງທະບຽນລາຍນິ້ວມືສຳເລັດ! ຄັ້ງຕໍ່ໄປໃຊ້ນິ້ວມືເຂົ້າໄດ້ເລີຍ');
+      document.getElementById('fpBtn').style.display = 'flex';
+    }
+  } catch(e) {
+    console.log('FP register error:', e.message);
+  }
+}
+
+async function fingerprintLogin() {
+  const saved = localStorage.getItem(FP_KEY);
+  if (!saved) return;
+
+  const fpBtn = document.getElementById('fpBtn');
+  document.getElementById('fpIcon').textContent = '⏳';
+  document.getElementById('fpText').textContent = 'ກຳລັງກວດລາຍນິ້ວມື...';
+  fpBtn.disabled = true;
+
+  try {
+    const data = JSON.parse(saved);
+    const challenge = new Uint8Array(32);
+    crypto.getRandomValues(challenge);
+
+    const assertion = await navigator.credentials.get({
+      publicKey: {
+        challenge,
+        allowCredentials: [{
+          id: new Uint8Array(data.id),
+          type: 'public-key'
+        }],
+        userVerification: 'required',
+        timeout: 60000,
+      }
+    });
+
+    if (assertion) {
+      fpBtn.classList.add('fp-success');
+      document.getElementById('fpIcon').textContent = '✅';
+      document.getElementById('fpText').textContent = 'ລາຍນິ້ວມືຖືກຕ້ອງ!';
+
+      // Login with saved username
+      document.getElementById('loginUser').value = data.username;
+      // Need to login with stored token or re-auth
+      // Use username to login via Apps Script with biometric flag
+      await loginWithFingerprint(data.username);
+    }
+  } catch(e) {
+    fpBtn.classList.add('fp-error');
+    document.getElementById('fpIcon').textContent = '❌';
+    document.getElementById('fpText').textContent = 'ລາຍນິ້ວມືບໍ່ຕົງ ລອງໃໝ່';
+    setTimeout(() => {
+      fpBtn.classList.remove('fp-error');
+      document.getElementById('fpIcon').textContent = '👆';
+      document.getElementById('fpText').textContent = 'ເຂົ້າດ້ວຍລາຍນິ້ວມື';
+      fpBtn.disabled = false;
+    }, 2000);
+  }
+}
+
+async function loginWithFingerprint(username) {
+  // Get saved password hash or use biometric session
+  const savedSession = localStorage.getItem('sbf_session_' + username);
+  if (savedSession) {
+    const session = JSON.parse(savedSession);
+    // Re-validate session is not expired (8hrs)
+    if (Date.now() - session.time < 8 * 3600 * 1000) {
+      currentUser = {name: session.name, role: session.role};
+      userToken = session.token;
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('appPage').style.display = 'flex';
+      document.getElementById('topbarUser').textContent = 'ສະບາຍດີ: ' + session.name;
+      startLogoutTimer();
+      loadAllData();
+      return;
+    }
+  }
+  // Session expired - need password
+  alert('⚠️ Session ໝົດອາຍຸ ກະລຸນາໃສ່ Password ອີກຄັ້ງ');
+  document.getElementById('fpIcon').textContent = '👆';
+  document.getElementById('fpText').textContent = 'ເຂົ້າດ້ວຍລາຍນິ້ວມື';
+  document.getElementById('fpBtn').disabled = false;
+  document.getElementById('fpBtn').classList.remove('fp-success');
+}
+
 // ====== DATE FORMAT ======
 function shortDate(d) {
   if (!d) return '-';
@@ -1331,12 +1493,29 @@ function normalize(t) {
 }
 </script>
 
+<!-- PWA INSTALL BANNER -->
+<div class="install-banner" id="installBanner">
+  <div class="install-banner-icon"><img src="logo.png" onerror="this.parentElement.innerHTML='🚔'"></div>
+  <div class="install-banner-text">
+    <h3>ຕິດຕັ້ງ App ຈັດສົ່ງບັດ</h3>
+    <p>ໃຊ້ງານໄດ້ເລີຍ ບໍ່ຕ້ອງເປີດ Browser</p>
+  </div>
+  <div class="install-banner-btns">
+    <button class="btn-install" onclick="installApp()">⬇️ ຕິດຕັ້ງ</button>
+    <button class="btn-install-later" onclick="dismissInstall()">✕</button>
+  </div>
+</div>
+
 <script>
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('sw.js').catch(e=>console.log('SW:',e));
   });
 }
+// Check fingerprint availability on load
+window.addEventListener('load', () => {
+  checkFingerprint();
+});
 </script>
 </body>
 </html>
