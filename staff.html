@@ -225,10 +225,10 @@ canvas{display:none;}
 
   <div class="tabs" id="tabBar">
     <button class="tab-btn active" onclick="switchTab('scan')">📤 ຈັດສົ່ງບັດ</button>
-    <button class="tab-btn" onclick="switchTab('pending')">⏳ ລໍຖ້າຈັດສົ່ງ</button>
-    <button class="tab-btn" onclick="switchTab('history')">✅ ຈັດສົ່ງສຳເລັດ</button>
-    <button class="tab-btn" onclick="switchTab('problems')">⚠️ ບັດມີບັນຫາ</button>
-    <button class="tab-btn" id="overdueTab" onclick="switchTab('overdue')">🚨 ບັດຄ້າງດົນ<span class="tab-badge" id="overdueCount" style="display:none">0</span></button>
+    <button class="tab-btn" onclick="switchTab('pending')">⏳ ລໍຖ້າ<span class="tab-badge" id="pendingCount" style="display:none;background:#d97706;">0</span></button>
+    <button class="tab-btn" onclick="switchTab('history')">✅ ສຳເລັດ<span class="tab-badge" id="historyCount" style="display:none;background:#059669;">0</span></button>
+    <button class="tab-btn" onclick="switchTab('problems')">⚠️ ບັນຫາ<span class="tab-badge" id="problemCount" style="display:none;background:#dc2626;">0</span></button>
+    <button class="tab-btn" onclick="switchTab('overdue')">🚨 ຄ້າງດົນ<span class="tab-badge" id="overdueCount" style="display:none;">0</span></button>
   </div>
 
   <div class="content">
@@ -308,6 +308,25 @@ canvas{display:none;}
     <div class="tab-panel" id="tab-pending">
       <div class="card">
         <div class="card-title">⏳ ລາຍການລໍຖ້າຈັດສົ່ງ</div>
+        <!-- Stats Bar -->
+        <div id="pendStatsBar" style="display:none;background:linear-gradient(135deg,#001f5e,#003087);border-radius:12px;padding:10px 14px;margin-bottom:10px;display:flex;gap:8px;">
+          <div style="flex:1;text-align:center;background:rgba(255,255,255,0.1);border-radius:8px;padding:7px 4px;">
+            <div style="font-size:20px;font-weight:900;color:#FFD700;" id="statPending">-</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.7);">⏳ ລໍຖ້າ</div>
+          </div>
+          <div style="flex:1;text-align:center;background:rgba(255,255,255,0.1);border-radius:8px;padding:7px 4px;">
+            <div style="font-size:20px;font-weight:900;color:#4ade80;" id="statDone">-</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.7);">✅ ສຳເລັດ</div>
+          </div>
+          <div style="flex:1;text-align:center;background:rgba(255,255,255,0.1);border-radius:8px;padding:7px 4px;">
+            <div style="font-size:20px;font-weight:900;color:#f87171;" id="statProblem">-</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.7);">⚠️ ບັນຫາ</div>
+          </div>
+          <div style="flex:1;text-align:center;background:rgba(255,255,255,0.1);border-radius:8px;padding:7px 4px;">
+            <div style="font-size:20px;font-weight:900;color:#fb923c;" id="statOverdue">-</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.7);">🚨 ຄ້າງດົນ</div>
+          </div>
+        </div>
         <button class="btn-primary" onclick="loadPending()">🔄 ໂຫຼດຂໍ້ມູນ</button>
         <input class="search-bar" type="text" id="pendSearch" placeholder="ຄົ້ນຫາຊື່..." oninput="filterPending()">
         <div id="pendingList"><div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">ກົດ "ໂຫຼດຂໍ້ມູນ"</div></div>
@@ -493,6 +512,8 @@ async function loadAllData() {
       }));
       allPending = allCards.filter(c => c.status && c.status.includes('ພີມບັດສຳເລັດ'));
       allProblems = allCards.filter(c => c.status && c.status.includes('ບັດມີບັນຫາ'));
+      // Update tab counts
+      updateTabCounts();
       // Load overdue AFTER allCards ready
       loadOverdueData();
     }
@@ -975,6 +996,35 @@ async function confirmDelivery() {
   document.getElementById('confirmBtn').disabled = false;
 }
 
+function updateTabCounts() {
+  const pending = allPending.length;
+  const done = allCards.filter(c => c.status && c.status.includes('ຈັດສົ່ງສຳເລັດ')).length;
+  const problems = allProblems.length;
+  const overdue = allOverdue.length;
+
+  const pb = document.getElementById('pendingCount');
+  const hb = document.getElementById('historyCount');
+  const prb = document.getElementById('problemCount');
+  const ob = document.getElementById('overdueCount');
+
+  if (pb) { pb.textContent = pending; pb.style.display = pending > 0 ? 'inline' : 'none'; }
+  if (hb) { hb.textContent = done; hb.style.display = done > 0 ? 'inline' : 'none'; }
+  if (prb) { prb.textContent = problems; prb.style.display = problems > 0 ? 'inline' : 'none'; }
+  if (ob) { ob.textContent = overdue; ob.style.display = overdue > 0 ? 'inline' : 'none'; }
+
+  // Update stats bar
+  const sb = document.getElementById('pendStatsBar');
+  if (sb) { sb.style.display = 'flex'; }
+  const sp = document.getElementById('statPending');
+  const sd = document.getElementById('statDone');
+  const spr = document.getElementById('statProblem');
+  const so = document.getElementById('statOverdue');
+  if (sp) sp.textContent = pending;
+  if (sd) sd.textContent = done;
+  if (spr) spr.textContent = problems;
+  if (so) so.textContent = overdue;
+}
+
 function quickDeliver(fn, ln, dob) {
   // ໄປໜ້າຈັດສົ່ງ + ຕື່ມຊື່ໃສ່ທັນທີ
   switchTab('scan');
@@ -1059,6 +1109,7 @@ async function loadOverdueData() {
     const total=allOverdue.length;
     const badge=document.getElementById('overdueCount');
     if(total>0){badge.textContent=total;badge.style.display='inline';}
+    updateTabCounts(); // refresh counts including overdue
     if(total>0) showOverduePopup(total,c60,c30,c15);
     renderOverdue();
   } catch(e){}
