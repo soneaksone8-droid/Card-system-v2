@@ -113,6 +113,25 @@ canvas{display:none;}
 .filter-row{display:flex;gap:6px;margin-bottom:10px;}
 .filter-btn{flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;border:2px solid;}
 /* SAVING */
+/* PENDING ITEMS */
+.pend-item{background:white;border-radius:14px;padding:13px 14px;margin-bottom:8px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border-left:4px solid #d97706;display:flex;align-items:center;gap:10px;transition:all 0.2s;}
+.pend-item.overdue-red{border-left-color:#dc2626;background:linear-gradient(135deg,#fff5f5,#fff);}
+.pend-item.overdue-orange{border-left-color:#ea580c;background:linear-gradient(135deg,#fff8f0,#fff);}
+.pend-item.overdue-yellow{border-left-color:#ca8a04;background:linear-gradient(135deg,#fffdf0,#fff);}
+.pend-item.normal{border-left-color:#2563eb;background:linear-gradient(135deg,#f0f7ff,#fff);}
+.pend-info{flex:1;min-width:0;}
+.pend-name{font-size:13px;font-weight:800;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pend-sub{font-size:11px;color:#6b7280;margin-top:2px;}
+.pend-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+.days-badge{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:900;white-space:nowrap;}
+.days-red{background:#dc2626;color:white;box-shadow:0 2px 6px rgba(220,38,38,0.4);}
+.days-orange{background:#ea580c;color:white;box-shadow:0 2px 6px rgba(234,88,12,0.4);}
+.days-yellow{background:#ca8a04;color:white;box-shadow:0 2px 6px rgba(202,138,4,0.4);}
+.days-blue{background:#2563eb;color:white;box-shadow:0 2px 6px rgba(37,99,235,0.3);}
+.days-green{background:#059669;color:white;box-shadow:0 2px 6px rgba(5,150,105,0.3);}
+.btn-quick-deliver{background:linear-gradient(135deg,#003087,#0052cc);color:white;border:none;border-radius:8px;padding:6px 10px;font-size:10px;font-weight:800;font-family:inherit;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(0,48,135,0.3);transition:all 0.2s;}
+.btn-quick-deliver:active{transform:scale(0.95);}
+
 .saving{position:fixed;bottom:20px;right:20px;background:var(--primary);color:white;padding:10px 16px;border-radius:10px;font-size:12px;font-weight:600;display:none;z-index:200;}
 /* SEARCH METHODS */
 .search-methods{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
@@ -277,7 +296,7 @@ canvas{display:none;}
             <div class="radio-btn selected" id="rbSelf" onclick="selectRecipient('self')">👤 ຮັບເອງ</div>
             <div class="radio-btn" id="rbProxy" onclick="selectRecipient('proxy')">👥 ຮັບແທນ</div>
           </div>
-          <input class="proxy-input" type="text" id="proxyName" placeholder="ຊື່ຜູ້ຮັບແທນ...">
+          <input class="proxy-input" type="text" id="proxyName" placeholder="ຊື່ຜູ້ຮັບແທນ..." oninput="this.style.borderColor='';this.style.boxShadow='';">
           <button class="btn-primary" onclick="confirmDelivery()" id="confirmBtn">✅ ຢືນຢັນຈັດສົ່ງ</button>
           <button class="btn-danger" onclick="markProblem()">❌ ໝາຍ ບັດມີບັນຫາ</button>
           <button class="btn-cancel" onclick="cancelScan()">🔄 ຍົກເລີກ / ສະແກນໃໝ່</button>
@@ -557,11 +576,28 @@ function filterHistory() {
 function filterPending() {
   const q = document.getElementById('pendSearch').value.trim().toLowerCase();
   let data = q ? allPending.filter(c => (c.firstName+' '+c.lastName).toLowerCase().includes(q)) : [...allPending];
+  data.sort((a,b) => getDays(b.date) - getDays(a.date));
   const el = document.getElementById('pendingList');
-  if (!data.length) { el.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:13px;padding:16px;">ບໍ່ມີຂໍ້ມູນ</div>'; return; }
+  if (!data.length) { el.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:13px;padding:20px;">✅ ບໍ່ມີລາຍການລໍຖ້າ<\/div>'; return; }
   el.innerHTML = data.map(c => {
-    const od = isOverdue(c.date);
-    return '<div class="pending-item'+(od?' overdue':'')+'"><div class="pending-name">'+c.firstName+' '+c.lastName+(od?' <span class="badge badge-danger">🚨 ຄ້າງດົນ<\/span>':'')+' <\/div><div class="pending-meta">📅 ເພີ່ມ: '+(c.date||'-')+'<\/div><\/div>';
+    const days = getDays(c.date);
+    let cls, bc, txt, ic;
+    if (days > 60) { cls='overdue-red'; bc='days-red'; ic='🔴'; txt='🔴 '+days+' ວັນ'; }
+    else if (days > 30) { cls='overdue-orange'; bc='days-orange'; ic='🟠'; txt='🟠 '+days+' ວັນ'; }
+    else if (days >= 15) { cls='overdue-yellow'; bc='days-yellow'; ic='🟡'; txt='🟡 '+days+' ວັນ'; }
+    else if (days >= 0) { cls='normal'; bc='days-blue'; ic='📋'; txt='📅 '+days+' ວັນ'; }
+    else { cls='normal'; bc='days-green'; ic='🆕'; txt='🆕 ໃໝ່'; }
+    const fn = c.firstName.replace(/'/g,"&#39;");
+    const ln = c.lastName.replace(/'/g,"&#39;");
+    const dob = (c.dob||''). replace(/'/g,"&#39;");
+    return '<div class="pend-item '+cls+'">'+
+      '<div class="pend-info">'+
+      '<div class="pend-name">'+ic+' '+c.firstName+' '+c.lastName+'<\/div>'+
+      '<div class="pend-sub">📅 '+shortDate(c.date||'')+( c.dob?' · 🎂 '+c.dob:'')+'<\/div>'+
+      '<\/div><div class="pend-right">'+
+      '<span class="days-badge '+bc+'">'+txt+'<\/span>'+
+      '<button class="btn-quick-deliver" onclick="quickDeliver(&quot;'+fn+'&quot;,&quot;'+ln+'&quot;,&quot;'+dob+'&quot;)">📤 ຈັດສົ່ງ<\/button>'+
+      '<\/div><\/div>';
   }).join('');
 }
 
@@ -856,7 +892,18 @@ function selectRecipient(type) {
 async function confirmDelivery() {
   if (!foundData) return;
   const proxy = recipientType==='proxy' ? document.getElementById('proxyName').value.trim() : '';
-  if (recipientType==='proxy' && !proxy) { alert('⚠️ ພິມຊື່ຜູ້ຮັບແທນ'); return; }
+  if (recipientType==='proxy' && !proxy) {
+    document.getElementById('proxyName').style.borderColor = '#dc2626';
+    document.getElementById('proxyName').style.boxShadow = '0 0 0 3px rgba(220,38,38,0.15)';
+    document.getElementById('proxyName').focus();
+    document.getElementById('proxyName').placeholder = '⚠️ ຕ້ອງໃສ່ຊື່ຜູ້ຮັບແທນ!';
+    setTimeout(() => {
+      document.getElementById('proxyName').placeholder = 'ຊື່ຜູ້ຮັບແທນ...';
+      document.getElementById('proxyName').style.borderColor = '';
+      document.getElementById('proxyName').style.boxShadow = '';
+    }, 3000);
+    return;
+  }
 
   const now = new Date();
   const day = String(now.getDate()).padStart(2,'0');
@@ -911,6 +958,20 @@ async function confirmDelivery() {
 
   document.getElementById('confirmBtn').textContent = '✅ ຢືນຢັນຈັດສົ່ງ';
   document.getElementById('confirmBtn').disabled = false;
+}
+
+function quickDeliver(fn, ln, dob) {
+  // ໄປໜ້າຈັດສົ່ງ + ຕື່ມຊື່ໃສ່ທັນທີ
+  switchTab('scan');
+  // ສະແດງ manual input
+  document.getElementById('manualInput').style.display = 'block';
+  document.getElementById('manualFn').value = fn;
+  document.getElementById('manualLn').value = ln;
+  // Scroll ຂຶ້ນ
+  document.getElementById('tab-scan').scrollTop = 0;
+  window.scrollTo(0, 0);
+  // ຄົ້ນຫາທັນທີ
+  setTimeout(() => searchCard(fn.toLowerCase(), ln.toLowerCase(), dob), 200);
 }
 
 function cancelScan() {
