@@ -293,6 +293,17 @@ body{font-family:'Noto Sans Lao',sans-serif;background:var(--light);min-height:1
 
     <!-- MANAGE DATA (Cards CRUD) -->
     <div class="tab-panel" id="tab-manage">
+      <div class="card" style="background:linear-gradient(135deg,#fef3f2,#fff);border:1.5px solid #fecaca;">
+        <div class="card-title" style="color:#dc2626;">🗑️ ລຶບຂໍ້ມູນທີ່ສຳເລັດແລ້ວ</div>
+        <div style="font-size:11px;color:#6b7280;margin-bottom:10px;line-height:1.6;">
+          ລຶບລາຍຊື່ທີ່ມີສະຖານະ "ຈັດສົ່ງສຳເລັດ" ອອກຈາກ Cards<br>
+          ເພື່ອຫຼຸດຄວາມສ່ຽງຂໍ້ມູນ (ປະຫວັດໃນ Delivery_Log ຍັງຄົງຢູ່)
+        </div>
+        <div id="cleanupPreview" style="font-size:13px;font-weight:700;color:#dc2626;margin-bottom:10px;">ກົດກວດກ່ອນລຶບ</div>
+        <button class="btn-refresh" onclick="previewCleanup()" style="background:#d97706;margin-bottom:8px;">🔍 ກວດກ່ອນລຶບ</button>
+        <button class="btn-refresh" onclick="executeCleanup()" id="cleanupBtn" style="background:#dc2626;display:none;">🗑️ ຢືນຢັນລຶບທັງໝົດ</button>
+      </div>
+
       <div class="card">
         <div class="card-title">📋 ຈັດການຂໍ້ມູນບຸກຄົນ</div>
         <button class="btn-refresh" onclick="loadManageData()">🔄 ໂຫຼດຂໍ້ມູນໃໝ່</button>
@@ -843,10 +854,60 @@ th{background:#fef2f2;color:#7f1d1d;font-weight:700;}
 <div class="footer">
   ສ້າງໂດຍລະບົບອັດຕະໂນມັດ — ລະບົບຈັດສົ່ງບັດປະຈຳຕົວດີຈິຕ້ອນ ປກສ ເມືອງເຊບັ້ງໄຟ
 </div>
-<scri" + "pt>window.onload = () => window.print();</scri" + "pt>
 </body></html>
   `);
   win.document.close();
+  win.onload = function() { win.print(); };
+}
+
+// ====== BATCH CLEANUP ======
+let cleanupCount = 0;
+
+async function previewCleanup() {
+  document.getElementById('cleanupPreview').textContent = '⏳ ກຳລັງກວດ...';
+  try {
+    const res = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getCards', token:adminToken})});
+    const data = await res.json();
+    if (data.status !== 'ok') return;
+    const doneCards = (data.data||[]).filter(c => c.status && c.status.includes('ຈັດສົ່ງສຳເລັດ'));
+    cleanupCount = doneCards.length;
+
+    if (cleanupCount === 0) {
+      document.getElementById('cleanupPreview').textContent = '✅ ບໍ່ມີຂໍ້ມູນທີ່ຕ້ອງລຶບ';
+      document.getElementById('cleanupBtn').style.display = 'none';
+    } else {
+      document.getElementById('cleanupPreview').textContent = '🔍 ພົບ '+cleanupCount+' ລາຍການທີ່ຈັດສົ່ງສຳເລັດແລ້ວ (ສາມາດລຶບໄດ້)';
+      document.getElementById('cleanupBtn').style.display = 'block';
+    }
+  } catch(e) {
+    document.getElementById('cleanupPreview').textContent = '❌ ເກີດຂໍ້ຜິດພາດ';
+  }
+}
+
+async function executeCleanup() {
+  if (!confirm('🗑️ ຢືນຢັນລຶບ '+cleanupCount+' ລາຍການທີ່ຈັດສົ່ງສຳເລັດແລ້ວ?\n\nປະຫວັດໃນ Delivery_Log ຍັງຄົງຢູ່\nແຕ່ຈະລຶບອອກຈາກ Cards ຖາວອນ')) return;
+  if (!confirm('⚠️ ຢືນຢັນອີກຄັ້ງ - ການກະທຳນີ້ບໍ່ສາມາດກູ້ຄືນໄດ້!')) return;
+
+  document.getElementById('cleanupBtn').textContent = '⏳ ກຳລັງລຶບ...';
+  document.getElementById('cleanupBtn').disabled = true;
+
+  try {
+    const res = await fetch(APPS, {
+      method:'POST',
+      body: JSON.stringify({action:'cleanupCompleted', token:adminToken})
+    });
+    const data = await res.json();
+    if (data.status === 'ok') {
+      alert('✅ ລຶບສຳເລັດ '+(data.deletedCount||cleanupCount)+' ລາຍການ');
+      document.getElementById('cleanupPreview').textContent = '✅ ລຶບສຳເລັດແລ້ວ';
+      document.getElementById('cleanupBtn').style.display = 'none';
+      loadOverview();
+    }
+  } catch(e) {
+    alert('❌ ເກີດຂໍ້ຜິດພາດ');
+  }
+  document.getElementById('cleanupBtn').textContent = '🗑️ ຢືນຢັນລຶບທັງໝົດ';
+  document.getElementById('cleanupBtn').disabled = false;
 }
 
 // ====== MANAGE DATA (CRUD for Cards) ======
@@ -983,9 +1044,30 @@ function renderStaffList() {
         '<div class="audit-action">'+s.name+' ('+s.username+')</div>'+
         '<div class="audit-detail">'+s.role+' · '+(isActive?'✅ ເຮັດວຽກ':'⛔ ປິດໃຊ້ງານ')+'</div>'+
       '</div>'+
-      '<button onclick="toggleStaffStatus('+idx+')" style="background:'+(isActive?'#fee2e2':'#f0fdf4')+';color:'+(isActive?'#dc2626':'#15803d')+';border:none;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">'+(isActive?'ປິດ':'ເປີດ')+'</button>'+
+      '<div style="display:flex;gap:4px;flex-shrink:0;">'+
+        '<button onclick="resetStaffPassword('+idx+')" style="background:#eff6ff;color:#1d4ed8;border:none;border-radius:6px;padding:6px 8px;font-size:11px;font-weight:700;cursor:pointer;">🔑</button>'+
+        '<button onclick="toggleStaffStatus('+idx+')" style="background:'+(isActive?'#fee2e2':'#f0fdf4')+';color:'+(isActive?'#dc2626':'#15803d')+';border:none;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">'+(isActive?'ປິດ':'ເປີດ')+'</button>'+
+      '</div>'+
     '</div>';
   }).join('');
+}
+
+async function resetStaffPassword(idx) {
+  const s = staffListCache[idx];
+  if (!s) return;
+  const newPass = prompt('🔑 ຕັ້ງລະຫັດຜ່ານໃໝ່ ສຳລັບ '+s.name+' ('+s.username+'):');
+  if (!newPass || !newPass.trim()) return;
+  if (newPass.trim().length < 4) { alert('⚠️ ລະຫັດຜ່ານຕ້ອງຢ່າງໜ້ອຍ 4 ໂຕ'); return; }
+
+  try {
+    await fetch(APPS, {
+      method:'POST', mode:'no-cors',
+      body: JSON.stringify({action:'resetPassword', token:adminToken, username:s.username, newPassword:newPass.trim()})
+    });
+    alert('✅ ປ່ຽນລະຫັດຜ່ານສຳເລັດ\nລະຫັດໃໝ່: '+newPass.trim()+'\n\nກະລຸນາແຈ້ງພະນັກງານ');
+  } catch(e) {
+    alert('❌ ເກີດຂໍ້ຜິດພາດ');
+  }
 }
 
 async function toggleStaffStatus(idx) {
