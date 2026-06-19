@@ -38,25 +38,45 @@ body{font-family:'Noto Sans Lao',sans-serif;background:linear-gradient(160deg,#0
 .btn:disabled{opacity:0.7;cursor:not-allowed;}
 .popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
 .popup-overlay.show{display:flex;animation:fadeIn 0.2s ease;}
-.result-popup{background:white;border-radius:24px;width:100%;max-width:380px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.4);animation:slideUp 0.3s ease;}
-.result-header{padding:28px 24px 20px;text-align:center;}
-.result-header.success{background:linear-gradient(135deg,#059669,#047857);}
-.result-header.pending{background:linear-gradient(135deg,#d97706,#b45309);}
-.result-header.delivered{background:linear-gradient(135deg,#2563eb,#1d4ed8);}
-.result-header.error{background:linear-gradient(135deg,#dc2626,#b91c1c);}
-.result-icon{font-size:52px;margin-bottom:8px;}
-.result-status{color:white;font-size:18px;font-weight:700;line-height:1.3;}
-.result-body{padding:20px 22px;}
-.result-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f3f4f6;}
-.result-row:last-child{border:none;}
-.result-label{font-size:12px;color:var(--gray);}
-.result-value{font-size:13px;font-weight:700;color:#1f2937;text-align:right;max-width:65%;}
-.result-note{background:#f9fafb;border-radius:10px;padding:12px;margin-top:4px;font-size:12px;color:var(--gray);text-align:center;line-height:1.6;}
-.btn-close{width:100%;padding:14px;border:none;border-radius:0 0 24px 24px;font-size:15px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;color:white;}
-.btn-close.success{background:#059669;}
-.btn-close.pending{background:#d97706;}
-.btn-close.delivered{background:#2563eb;}
-.btn-close.error{background:#dc2626;}
+.result-popup{background:#ffffff;border-radius:28px;width:100%;max-width:380px;overflow:hidden;box-shadow:0 25px 70px rgba(0,0,0,0.5);animation:popupRise 0.4s cubic-bezier(0.34,1.56,0.64,1);position:relative;}
+@keyframes popupRise{from{opacity:0;transform:translateY(40px) scale(0.92);}to{opacity:1;transform:translateY(0) scale(1);}}
+
+.result-header{padding:36px 24px 28px;text-align:center;position:relative;overflow:hidden;}
+.result-header::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(255,255,255,0.25) 0%,transparent 60%);}
+.result-header::after{content:'';position:absolute;top:-50%;left:-20%;width:140%;height:200%;background:repeating-linear-gradient(45deg,rgba(255,255,255,0.03) 0px,rgba(255,255,255,0.03) 2px,transparent 2px,transparent 12px);}
+
+.result-header.success{background:linear-gradient(160deg,#0d9488,#059669 50%,#047857);}
+.result-header.pending{background:linear-gradient(160deg,#f59e0b,#d97706 50%,#b45309);}
+.result-header.delivered{background:linear-gradient(160deg,#3b82f6,#2563eb 50%,#1d4ed8);}
+.result-header.error{background:linear-gradient(160deg,#ef4444,#dc2626 50%,#b91c1c);}
+
+.result-icon-ring{width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,0.18);border:2px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;position:relative;z-index:1;box-shadow:0 8px 24px rgba(0,0,0,0.15),inset 0 2px 4px rgba(255,255,255,0.3);}
+.result-icon{font-size:42px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2));}
+.result-status{color:white;font-size:19px;font-weight:900;line-height:1.35;position:relative;z-index:1;text-shadow:0 2px 8px rgba(0,0,0,0.15);letter-spacing:0.2px;}
+
+.result-body{padding:24px 24px 8px;}
+.result-id-card{background:linear-gradient(135deg,#f8fafc,#f1f5f9);border:1.5px solid #e2e8f0;border-radius:18px;padding:18px 20px;margin-bottom:16px;}
+.result-name-label{font-size:10px;color:#94a3b8;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.result-name-value{font-size:19px;font-weight:900;color:#0f172a;line-height:1.3;}
+.result-divider{height:1px;background:linear-gradient(90deg,transparent,#e2e8f0,transparent);margin:14px 0;}
+.result-row{display:flex;justify-content:space-between;align-items:center;}
+.result-label{font-size:11px;color:#94a3b8;font-weight:600;}
+.result-value{font-size:13px;font-weight:800;color:#1e293b;text-align:right;}
+
+.result-note{border-radius:14px;padding:14px 16px;margin:0 24px 20px;font-size:12px;text-align:center;line-height:1.7;font-weight:600;}
+.result-note.success{background:linear-gradient(135deg,#ecfdf5,#d1fae5);color:#065f46;border:1px solid #6ee7b7;}
+.result-note.pending{background:linear-gradient(135deg,#fffbeb,#fef3c7);color:#92400e;border:1px solid #fcd34d;}
+.result-note.delivered{background:linear-gradient(135deg,#eff6ff,#dbeafe);color:#1e40af;border:1px solid #93c5fd;}
+.result-note.error{background:linear-gradient(135deg,#fef2f2,#fee2e2);color:#991b1b;border:1px solid #fca5a5;}
+
+.btn-close{width:calc(100% - 48px);margin:0 24px 24px;padding:15px;border:none;border-radius:16px;font-size:14px;font-weight:800;font-family:'Noto Sans Lao',sans-serif;cursor:pointer;color:white;letter-spacing:0.3px;transition:all 0.2s;box-shadow:0 4px 14px rgba(0,0,0,0.15);}
+.btn-close:active{transform:scale(0.97);}
+.btn-close.success{background:linear-gradient(135deg,#10b981,#059669);}
+.btn-close.pending{background:linear-gradient(135deg,#f59e0b,#d97706);}
+.btn-close.delivered{background:linear-gradient(135deg,#3b82f6,#2563eb);}
+.btn-close.error{background:linear-gradient(135deg,#ef4444,#dc2626);}
+
+.org-badge{position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:4px 10px;font-size:9px;color:white;font-weight:700;letter-spacing:0.5px;z-index:2;}
 .footer{padding:14px;text-align:center;color:rgba(255,255,255,0.5);font-size:10.5px;line-height:1.8;}
 .spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
@@ -108,18 +128,46 @@ body{font-family:'Noto Sans Lao',sans-serif;background:linear-gradient(160deg,#0
   © 2026 ກອງບັນຊາການ ປກສ ເມືອງເຊບັ້ງໄຟ ແຂວງຄຳມ່ວນ
 </div>
 
+<!-- LANGUAGE WARNING POPUP -->
+<div class="popup-overlay" id="langPopup" onclick="closeLangWarning(event)">
+  <div class="result-popup" style="max-width:340px;">
+    <div class="result-header" style="background:linear-gradient(160deg,#f59e0b,#d97706 50%,#b45309);padding:32px 24px 26px;">
+      <div class="result-icon-ring" style="width:76px;height:76px;">
+        <div class="result-icon" style="font-size:38px;">🇱🇦</div>
+      </div>
+      <div class="result-status" style="font-size:17px;">ກະລຸນາພິມພາສາລາວ</div>
+    </div>
+    <div style="padding:22px 24px 6px;">
+      <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1.5px solid #fcd34d;border-radius:16px;padding:16px 18px;text-align:center;">
+        <div style="font-size:11px;color:#92400e;font-weight:700;margin-bottom:8px;letter-spacing:0.5px;">✏️ ຕົວຢ່າງການພິມທີ່ຖືກຕ້ອງ</div>
+        <div style="font-size:20px;font-weight:900;color:#78350f;">ສົມໃຈ ພົມມະວົງ</div>
+      </div>
+    </div>
+    <div class="result-note pending" style="margin-top:16px;">ລະບົບກວດສອບໄດ້ສະເພາະ ຕົວອັກສອນລາວ ເທົ່ານັ້ນ ກະລຸນາລົບພາສາອື່ນອອກ</div>
+    <button class="btn-close pending" onclick="closeLangWarning()">✓ ເຂົ້າໃຈແລ້ວ</button>
+  </div>
+</div>
+
 <div class="popup-overlay" id="resultPopup" onclick="closeResult(event)">
   <div class="result-popup">
     <div class="result-header" id="rHeader">
-      <div class="result-icon" id="rIcon"></div>
+      <div class="org-badge">🛡️ ປກສ ເຊບັ້ງໄຟ</div>
+      <div class="result-icon-ring"><div class="result-icon" id="rIcon"></div></div>
       <div class="result-status" id="rStatus"></div>
     </div>
     <div class="result-body">
-      <div class="result-row"><span class="result-label">ຊື່-ນາມສະກຸນ</span><span class="result-value" id="rName"></span></div>
-      <div class="result-row"><span class="result-label">ສະຖານະ</span><span class="result-value" id="rStat"></span></div>
-      <div class="result-note" id="rNote"></div>
+      <div class="result-id-card">
+        <div class="result-name-label">ຊື່ - ນາມສະກຸນ</div>
+        <div class="result-name-value" id="rName"></div>
+        <div class="result-divider"></div>
+        <div class="result-row">
+          <span class="result-label">ສະຖານະ</span>
+          <span class="result-value" id="rStat"></span>
+        </div>
+      </div>
     </div>
-    <button class="btn-close" id="rCloseBtn" onclick="closeResult()">ປິດ</button>
+    <div class="result-note" id="rNote"></div>
+    <button class="btn-close" id="rCloseBtn" onclick="closeResult()">✓ ຮັບຊາບແລ້ວ</button>
   </div>
 </div>
 
@@ -130,8 +178,10 @@ const CLIENT_ID = 'pub_' + Math.random().toString(36).substr(2,9);
 function normalize(t) {
   if (!t) return '';
   t = t.trim();
-  // ລຶບຄຳນຳໜ້າຫຼາຍຮູບແບບ
-  t = t.replace(/^(ທ້າວ|ນາງສາວ|ນາງ|ນ\.|ທ\.|ທ່ານ|ບອກ)\s*/u, '');
+  // ລຶບຄຳນຳໜ້າຫຼາຍຮູບແບບ (ລຽງຍາວ→ສັ້ນ ເພື່ອບໍ່ໃຫ້ Match ຜິດ)
+  // ຮອງຮັບ: ມີ/ບໍ່ມີ "." ມີ/ບໍ່ມີ ຊ່ອງຫວ່າງ
+  t = t.replace(/^(ນາງສາວ|ທ້າວ|ນາງ|ທ່ານ|ບອກ)[\s\.]*/u, '');
+  t = t.replace(/^(ນ|ທ)[\s\.]+/u, ''); // ນ. ນ ທ. ທ ຕາມດ້ວຍຈຸດ/ຊ່ອງຫວ່າງ
   // ປ່ຽນຮູບແບບສະກົດ
   t = t.replace(/ຫນ/g,'ໜ').replace(/ຫມ/g,'ໝ').replace(/ຫລ/g,'ຫຼ');
   // ລຶບຊ່ອງຫວ່າງຊ້ຳ
@@ -195,7 +245,7 @@ async function doSearch() {
 
   // ກວດພາສາອັງກິດ
   if (!err && (hasEnglish(fn) || hasEnglish(ln))) {
-    alert('⚠️ ກະລຸນາພິມເປັນພາສາລາວເທົ່ານັ້ນ\nຕົວຢ່າງ: ສົມໃຈ ພົມມະວົງ');
+    showLangWarning();
     return;
   }
 
@@ -266,9 +316,20 @@ function showResult(found, fn, ln, errMsg) {
   document.getElementById('rIcon').textContent = icon;
   document.getElementById('rStatus').textContent = status;
   document.getElementById('rNote').textContent = note;
+  document.getElementById('rNote').className = 'result-note ' + type;
   document.getElementById('rCloseBtn').className = 'btn-close ' + type;
   document.getElementById('resultPopup').classList.add('show');
   playResultSound(type);
+}
+
+function showLangWarning() {
+  document.getElementById('langPopup').classList.add('show');
+  playResultSound('pending');
+}
+
+function closeLangWarning(e) {
+  if (e && e.target !== document.getElementById('langPopup')) return;
+  document.getElementById('langPopup').classList.remove('show');
 }
 
 function closeResult(e) {
