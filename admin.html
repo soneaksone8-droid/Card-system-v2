@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - ປກສ ເຊບັ້ງໄຟ</title>
+<link rel="manifest" href="manifest-admin.json">
+<meta name="theme-color" content="#7f1d1d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Admin ຈັດສົ່ງບັດ">
+<link rel="apple-touch-icon" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--primary:#003087;--accent:#7f1d1d;--gold:#FFD700;--white:#fff;--gray:#6b7280;--success:#059669;--warning:#d97706;--danger:#dc2626;--light:#f5f6fa;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans Lao',sans-serif;background:var(--light);min-height:100vh;}
+/* LOGIN */
+.login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#1a0505,#7f1d1d,#001f5e);padding:20px;}
+.login-box{background:white;border-radius:24px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+.login-logo{width:80px;height:80px;border-radius:50%;border:3px solid var(--gold);margin:0 auto 16px;display:block;overflow:hidden;background:white;}
+.login-logo img{width:100%;height:100%;object-fit:cover;}
+.login-title{text-align:center;font-size:20px;font-weight:800;color:var(--accent);margin-bottom:4px;}
+.login-sub{text-align:center;font-size:12px;color:var(--gray);margin-bottom:24px;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:12px;font-weight:700;color:var(--accent);margin-bottom:5px;}
+.form-group input{width:100%;padding:12px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:inherit;}
+.form-group input:focus{outline:none;border-color:var(--accent);}
+.btn-login{width:100%;padding:13px;background:linear-gradient(135deg,#7f1d1d,#991b1b);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;}
+.login-err{color:var(--danger);font-size:12px;text-align:center;margin-top:8px;display:none;}
+/* APP */
+.app-page{display:none;flex-direction:column;min-height:100vh;}
+.topbar{background:linear-gradient(135deg,#7f1d1d,#991b1b);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--gold);}
+.topbar-left{display:flex;align-items:center;gap:10px;}
+.topbar-logo{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--gold);overflow:hidden;background:white;flex-shrink:0;}
+.topbar-logo img{width:100%;height:100%;object-fit:cover;}
+.topbar-info h2{color:white;font-size:13px;font-weight:700;}
+.topbar-info p{color:rgba(255,255,255,0.75);font-size:10px;}
+.btn-logout{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;}
+/* TABS */
+.tabs{display:flex;overflow-x:auto;background:linear-gradient(135deg,#3a0a0a,#7f1d1d);border-bottom:2px solid var(--gold);-webkit-overflow-scrolling:touch;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab-btn{padding:10px 13px;border:none;background:transparent;font-size:11px;font-weight:900;font-family:inherit;color:rgba(255,255,255,0.55);cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all 0.2s;}
+.tab-btn.active{color:#FFE44D;border-bottom-color:var(--gold);background:rgba(255,215,0,0.1);}
+/* CONTENT */
+.content{flex:1;padding:14px;overflow-y:auto;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+.card{background:white;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.card-title{font-size:14px;font-weight:700;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.stat-card{border-radius:14px;padding:16px;color:white;}
+.stat-card.blue{background:linear-gradient(135deg,#1e3a8a,#1e40af);}
+.stat-card.green{background:linear-gradient(135deg,#065f46,#059669);}
+.stat-card.orange{background:linear-gradient(135deg,#9a3412,#ea580c);}
+.stat-card.red{background:linear-gradient(135deg,#7f1d1d,#dc2626);}
+.stat-num{font-size:28px;font-weight:900;line-height:1;margin-bottom:4px;}
+.stat-label{font-size:11px;opacity:0.85;}
+.stat-icon{font-size:18px;margin-bottom:6px;opacity:0.8;}
+/* SEARCH LOG */
+.search-log-item{background:white;border-radius:10px;padding:10px 12px;margin-bottom:6px;border:1px solid #e5e7eb;display:flex;align-items:center;gap:10px;}
+.search-log-item.found{border-left:3px solid #059669;}
+.search-log-item.notfound{border-left:3px solid #d97706;}
+.sl-time{font-size:10px;color:#9ca3af;font-weight:700;min-width:42px;}
+.sl-name{flex:1;font-size:12px;font-weight:600;color:#1f2937;}
+.sl-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;}
+.sl-status.found{background:#f0fdf4;color:#166534;}
+.sl-status.notfound{background:#fff7ed;color:#c2410c;}
+/* STAFF PERF */
+.staff-perf-item{background:white;border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1px solid #e5e7eb;}
+.staff-perf-name{font-size:13px;font-weight:700;color:#1f2937;margin-bottom:6px;display:flex;justify-content:space-between;}
+.staff-perf-count{color:var(--accent);font-weight:900;}
+.progress-bar{height:8px;background:#f3f4f6;border-radius:4px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#7f1d1d,#dc2626);border-radius:4px;transition:width 0.5s;}
+/* FINANCE */
+.finance-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.finance-box{background:white;border:1.5px solid #e5e7eb;border-radius:12px;padding:14px;text-align:center;}
+.finance-box-label{font-size:11px;color:var(--gray);margin-bottom:6px;}
+.finance-box-val{font-size:18px;font-weight:900;color:var(--accent);}
+.withdraw-form{background:#fef3f2;border:1px solid #fecaca;border-radius:12px;padding:14px;margin-bottom:14px;}
+.input-row{margin-bottom:10px;}
+.input-row label{display:block;font-size:11px;font-weight:700;color:var(--accent);margin-bottom:4px;}
+.input-row input,.input-row select{width:100%;padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;}
+.btn-withdraw{width:100%;padding:12px;background:linear-gradient(135deg,#7f1d1d,#991b1b);color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;}
+.withdraw-history-item{background:white;border-radius:10px;padding:10px 12px;margin-bottom:6px;border-left:3px solid var(--success);}
+.wh-top{display:flex;justify-content:space-between;margin-bottom:3px;}
+.wh-date{font-size:10px;color:#9ca3af;}
+.wh-detail{font-size:11px;color:var(--gray);}
+/* AUDIT LOG */
+.audit-item{background:white;border-radius:10px;padding:10px 12px;margin-bottom:6px;border:1px solid #e5e7eb;display:flex;align-items:center;gap:10px;}
+.audit-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.audit-icon.login{background:#f0fdf4;}
+.audit-icon.fail{background:#fee2e2;}
+.audit-icon.delivery{background:#eff6ff;}
+.audit-icon.problem{background:#fff7ed;}
+.audit-text{flex:1;}
+.audit-action{font-size:12px;font-weight:700;color:#1f2937;}
+.audit-detail{font-size:10px;color:#9ca3af;}
+.search-bar{width:100%;padding:10px 12px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px;font-family:inherit;margin-bottom:10px;}
+.btn-refresh{background:var(--accent);color:white;border:none;border-radius:10px;padding:10px 16px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.empty-state{text-align:center;color:var(--gray);font-size:13px;padding:24px;}
+.loading-state{text-align:center;color:var(--gray);font-size:13px;padding:24px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-page" id="loginPage">
+  <div class="login-box">
+    <div class="login-logo"><img src="logo.png" onerror="this.parentElement.innerHTML='👑'"></div>
+    <div class="login-title">Admin Dashboard</div>
+    <div class="login-sub">ປກສ ເມືອງເຊບັ້ງໄຟ</div>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="ພິມ username...">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="ພິມ password..." onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-login" onclick="doLogin()" id="loginBtn">🔐 ເຂົ້າສູ່ລະບົບ Admin</button>
+    <div class="login-err" id="loginErr">❌ ບໍ່ມີສິດ Admin ຫຼື ຂໍ້ມູນຜິດ</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app-page" id="appPage">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo"><img src="logo.png" onerror="this.parentElement.innerHTML='👑'"></div>
+      <div class="topbar-info">
+        <h2>Admin Dashboard</h2>
+        <p id="topbarUser">ສະບາຍດີ</p>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">ອອກ</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('overview')">📊 ພາບລວມ</button>
+    <button class="tab-btn" onclick="switchTab('search')">🔍 ການຄົ້ນຫາ</button>
+    <button class="tab-btn" onclick="switchTab('staff')">👷 ພະນັກງານ</button>
+    <button class="tab-btn" onclick="switchTab('finance')">💰 ການເງິນ</button>
+    <button class="tab-btn" onclick="switchTab('audit')">🛡️ Audit Log</button>
+  </div>
+
+  <div class="content">
+
+    <!-- OVERVIEW -->
+    <div class="tab-panel active" id="tab-overview">
+      <button class="btn-refresh" onclick="loadOverview()">🔄 ໂຫຼດຂໍ້ມູນໃໝ່</button>
+
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-icon">📋</div>
+          <div class="stat-num" id="ovTotal">-</div>
+          <div class="stat-label">ບັດທັງໝົດ</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon">✅</div>
+          <div class="stat-num" id="ovDone">-</div>
+          <div class="stat-label">ຈັດສົ່ງສຳເລັດ</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-num" id="ovPending">-</div>
+          <div class="stat-label">ລໍຖ້າຈັດສົ່ງ</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-num" id="ovProblem">-</div>
+          <div class="stat-label">ມີບັນຫາ</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🚨 ບັດຄ້າງດົນ</div>
+        <div class="stats-grid" style="margin-bottom:0;">
+          <div class="stat-card red" style="padding:12px;">
+            <div class="stat-num" id="ov60" style="font-size:22px;">-</div>
+            <div class="stat-label">🔴 ຄ້າງ >60 ວັນ</div>
+          </div>
+          <div class="stat-card orange" style="padding:12px;">
+            <div class="stat-num" id="ov30" style="font-size:22px;">-</div>
+            <div class="stat-label">🟠 ຄ້າງ >30 ວັນ</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👥 ການຄົ້ນຫາສາທາລະນະມື້ນີ້</div>
+        <div class="stats-grid" style="margin-bottom:0;">
+          <div class="stat-card blue" style="padding:12px;">
+            <div class="stat-num" id="ovSearchToday" style="font-size:22px;">-</div>
+            <div class="stat-label">ຄົ້ນຫາມື້ນີ້</div>
+          </div>
+          <div class="stat-card green" style="padding:12px;">
+            <div class="stat-num" id="ovSearchFound" style="font-size:22px;">-</div>
+            <div class="stat-label">ພົບຂໍ້ມູນ</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📈 ສະຖິຕິຈັດສົ່ງ 7 ວັນຫຼ້າສຸດ</div>
+        <canvas id="weekChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- SEARCH LOG -->
+    <div class="tab-panel" id="tab-search">
+      <div class="card">
+        <div class="card-title">🔍 ປະຫວັດການຄົ້ນຫາ (ປະຊາຊົນ)</div>
+        <button class="btn-refresh" onclick="loadSearchLog()">🔄 ໂຫຼດຂໍ້ມູນໃໝ່</button>
+        <input class="search-bar" type="text" id="searchLogFilter" placeholder="ຄົ້ນຫາຊື່..." oninput="renderSearchLog()">
+        <div id="searchLogList"><div class="loading-state">ກົດ "ໂຫຼດຂໍ້ມູນໃໝ່"</div></div>
+      </div>
+    </div>
+
+    <!-- STAFF PERFORMANCE -->
+    <div class="tab-panel" id="tab-staff">
+      <div class="card">
+        <div class="card-title">👷 ປະສິດທິພາບພະນັກງານ (ມື້ນີ້)</div>
+        <button class="btn-refresh" onclick="loadStaffPerf()">🔄 ໂຫຼດຂໍ້ມູນໃໝ່</button>
+        <div id="staffPerfList"><div class="loading-state">ກົດ "ໂຫຼດຂໍ້ມູນໃໝ່"</div></div>
+      </div>
+    </div>
+
+    <!-- FINANCE -->
+    <div class="tab-panel" id="tab-finance">
+      <div class="card">
+        <div class="card-title">💰 ສະຫຼຸບການເງິນ</div>
+        <div class="finance-summary">
+          <div class="finance-box">
+            <div class="finance-box-label">ລາຍຮັບລວມ</div>
+            <div class="finance-box-val" id="finIncome">-</div>
+          </div>
+          <div class="finance-box">
+            <div class="finance-box-label">ຖອນແລ້ວ</div>
+            <div class="finance-box-val" id="finWithdrawn">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">➖ ຖອນເງິນ</div>
+        <div class="withdraw-form">
+          <div class="input-row">
+            <label>ຈຳນວນ (ກີບ)</label>
+            <input type="number" id="wdAmount" placeholder="0">
+          </div>
+          <div class="input-row">
+            <label>ຖອນໃຫ້</label>
+            <input type="text" id="wdTo" placeholder="ຊື່ຜູ້ຮັບ...">
+          </div>
+          <div class="input-row">
+            <label>ໝາຍເຫດ</label>
+            <input type="text" id="wdNote" placeholder="ໝາຍເຫດ (ບໍ່ບັງຄັບ)">
+          </div>
+          <button class="btn-withdraw" onclick="submitWithdraw()">✅ ຢືນຢັນຖອນເງິນ</button>
+        </div>
+        <div class="card-title" style="font-size:12px;">📜 ປະຫວັດການຖອນ</div>
+        <div id="withdrawList"><div class="loading-state">ກຳລັງໂຫຼດ...</div></div>
+      </div>
+    </div>
+
+    <!-- AUDIT LOG -->
+    <div class="tab-panel" id="tab-audit">
+      <div class="card">
+        <div class="card-title">🛡️ Audit Log (ຄວາມປອດໄພ)</div>
+        <button class="btn-refresh" onclick="loadAuditLog()">🔄 ໂຫຼດຂໍ້ມູນໃໝ່</button>
+        <input class="search-bar" type="text" id="auditFilter" placeholder="ຄົ້ນຫາ..." oninput="renderAuditLog()">
+        <div id="auditList"><div class="loading-state">ກົດ "ໂຫຼດຂໍ້ມູນໃໝ່"</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const APPS = 'https://script.google.com/macros/s/AKfycbxHLR4Ba3toWa4JL6PMvK1oZ70Pjz5596BMEEEThWEYV-qj-wdlLyCSw5d3Zp6c7HM/exec';
+let currentAdmin = null;
+let adminToken = null;
+let allCards = [];
+let allDeliveries = [];
+let allSystemLog = [];
+let allWithdrawals = [];
+let weekChartInstance = null;
+
+// ====== LOGIN ======
+async function doLogin() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value.trim();
+  if (!user || !pass) return;
+  document.getElementById('loginBtn').textContent = '⏳ ກຳລັງເຂົ້າ...';
+  try {
+    const res = await fetch(APPS, {
+      method: 'POST',
+      body: JSON.stringify({action:'adminLogin', username:user, password:pass})
+    });
+    const data = await res.json();
+    if (data.success) {
+      currentAdmin = {name: data.name, role: data.role};
+      adminToken = data.token;
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('appPage').style.display = 'flex';
+      document.getElementById('topbarUser').textContent = 'ສະບາຍດີ: ' + data.name;
+      loadAllInitial();
+    } else {
+      document.getElementById('loginErr').style.display = 'block';
+      setTimeout(()=>document.getElementById('loginErr').style.display='none', 3000);
+    }
+  } catch(e) {
+    alert('❌ ເຊື່ອມຕໍ່ບໍ່ໄດ້');
+  }
+  document.getElementById('loginBtn').textContent = '🔐 ເຂົ້າສູ່ລະບົບ Admin';
+}
+
+function doLogout() {
+  if (!confirm('ຕ້ອງການອອກ?')) return;
+  currentAdmin = null; adminToken = null;
+  document.getElementById('appPage').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+}
+
+// ====== TABS ======
+function switchTab(t) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['overview','search','staff','finance','audit'][i]===t);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+}
+
+// ====== LOAD ALL INITIAL ======
+async function loadAllInitial() {
+  await loadOverview();
+  await loadWithdrawList();
+}
+
+// ====== OVERVIEW ======
+async function loadOverview() {
+  try {
+    const res = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getCards', token:adminToken})});
+    const data = await res.json();
+    if (data.status === 'ok') {
+      allCards = data.data || [];
+      const total = allCards.length;
+      const done = allCards.filter(c => c.status && c.status.includes('ຈັດສົ່ງສຳເລັດ')).length;
+      const pending = allCards.filter(c => c.status && c.status.includes('ພີມບັດສຳເລັດ')).length;
+      const problem = allCards.filter(c => c.status && c.status.includes('ບັດມີບັນຫາ')).length;
+
+      document.getElementById('ovTotal').textContent = total;
+      document.getElementById('ovDone').textContent = done;
+      document.getElementById('ovPending').textContent = pending;
+      document.getElementById('ovProblem').textContent = problem;
+
+      // Overdue calc
+      const now = new Date();
+      let c60=0, c30=0;
+      allCards.filter(c => c.status && c.status.includes('ພີມບັດສຳເລັດ')).forEach(c => {
+        const days = getDaysFromDate(c.date);
+        if (days > 60) c60++;
+        else if (days > 30) c30++;
+      });
+      document.getElementById('ov60').textContent = c60;
+      document.getElementById('ov30').textContent = c30;
+    }
+
+    // Deliveries for chart
+    const dres = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getDeliveries', token:adminToken})});
+    const ddata = await dres.json();
+    if (ddata.status === 'ok') {
+      allDeliveries = ddata.data || [];
+      renderWeekChart();
+    }
+
+    // Search stats
+    await loadSearchStats();
+  } catch(e) { console.error(e); }
+}
+
+function getDaysFromDate(dateStr) {
+  if (!dateStr) return -1;
+  try {
+    const s = dateStr.toString().trim();
+    if (s.includes('GMT') || s.length > 20) {
+      const dt = new Date(s);
+      if (!isNaN(dt) && dt.getFullYear() > 2000) return Math.floor((new Date()-dt)/86400000);
+      return -1;
+    }
+    const p = s.split('/');
+    if (p.length === 3) {
+      let yr = Number(p[2]);
+      if (yr < 100) yr += 2000;
+      const dt = new Date(yr, Number(p[1])-1, Number(p[0]));
+      if (isNaN(dt)) return -1;
+      return Math.floor((new Date()-dt)/86400000);
+    }
+    return -1;
+  } catch(e) { return -1; }
+}
+
+function shortDate(d) {
+  if (!d) return '-';
+  d = d.toString().trim();
+  if (d.includes('GMT') || d.length > 20) {
+    try {
+      const dt = new Date(d);
+      if (!isNaN(dt)) return String(dt.getDate()).padStart(2,'0')+'/'+String(dt.getMonth()+1).padStart(2,'0')+'/'+String(dt.getFullYear()).slice(-2);
+    } catch(e) {}
+  }
+  const m1 = d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m1) return m1[1].padStart(2,'0')+'/'+m1[2].padStart(2,'0')+'/'+m1[3].slice(-2);
+  return d;
+}
+
+function shortTime(t) {
+  if (!t) return '';
+  t = t.toString().trim();
+  if (t.includes('GMT') || t.length > 15) {
+    try {
+      const dt = new Date(t);
+      if (!isNaN(dt)) return String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0');
+    } catch(e) {}
+    const rm = t.match(/(\d{2}:\d{2}):\d{2}/);
+    if (rm) return rm[1];
+  }
+  const m = t.match(/^(\d{1,2}:\d{2})/);
+  if (m) return m[1];
+  return t;
+}
+
+function renderWeekChart() {
+  const ctx = document.getElementById('weekChart');
+  if (!ctx) return;
+  const days = [];
+  const counts = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const label = String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');
+    days.push(label);
+    const count = allDeliveries.filter(dl => {
+      const dDate = shortDate(dl.date);
+      return dDate === label || dDate === label+'/'+String(d.getFullYear()).slice(-2);
+    }).length;
+    counts.push(count);
+  }
+  if (weekChartInstance) weekChartInstance.destroy();
+  weekChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: days,
+      datasets: [{
+        label: 'ຈັດສົ່ງ',
+        data: counts,
+        backgroundColor: '#7f1d1d',
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+  });
+}
+
+// ====== SEARCH LOG (Public search history) ======
+async function loadSearchStats() {
+  try {
+    const res = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getStats', token:adminToken})});
+    const data = await res.json();
+    if (data.status === 'ok') {
+      document.getElementById('ovSearchToday').textContent = data.searchToday || 0;
+      document.getElementById('ovSearchFound').textContent = data.searchFound || 0;
+    }
+  } catch(e) {}
+}
+
+async function loadSearchLog() {
+  document.getElementById('searchLogList').innerHTML = '<div class="loading-state">ກຳລັງໂຫຼດ...</div>';
+  try {
+    const url = 'https://docs.google.com/spreadsheets/d/1ab6lfE1_Wlhyq95oOt83Tbzq72mE-sagfQRJ3IVWcjU/gviz/tq?tqx=out:json&sheet=System_Log';
+    const res = await fetch(url);
+    const text = await res.text();
+    const m = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+    if (!m) { document.getElementById('searchLogList').innerHTML = '<div class="empty-state">ບໍ່ມີຂໍ້ມູນ</div>'; return; }
+    const json = JSON.parse(m[1]);
+    const rows = json.table.rows;
+    allSystemLog = rows.map(r => ({
+      time: r.c[0]?.v || '',
+      user: r.c[1]?.v || '',
+      action: r.c[2]?.v || '',
+      detail: r.c[3]?.v || '',
+      extra: r.c[4]?.v || '',
+    })).filter(r => r.action === 'SEARCH').reverse();
+    renderSearchLog();
+  } catch(e) {
+    document.getElementById('searchLogList').innerHTML = '<div class="empty-state">ເກີດຂໍ້ຜິດພາດ</div>';
+  }
+}
+
+function renderSearchLog() {
+  const q = (document.getElementById('searchLogFilter').value || '').trim().toLowerCase();
+  let data = q ? allSystemLog.filter(r => (r.detail||'').toLowerCase().includes(q)) : allSystemLog;
+  const el = document.getElementById('searchLogList');
+  if (!data.length) { el.innerHTML = '<div class="empty-state">ບໍ່ມີຂໍ້ມູນການຄົ້ນຫາ</div>'; return; }
+  el.innerHTML = data.slice(0, 200).map(r => {
+    const found = r.extra === 'FOUND';
+    const timeStr = shortTime(r.time);
+    const dateStr = shortDate(r.time);
+    return '<div class="search-log-item '+(found?'found':'notfound')+'">'+
+      '<div class="sl-time">'+timeStr+'<br><span style="font-size:8px;">'+dateStr+'</span></div>'+
+      '<div class="sl-name">🔍 '+(r.detail||'-')+'</div>'+
+      '<div class="sl-status '+(found?'found':'notfound')+'">'+(found?'✓ ພົບ':'✗ ບໍ່ພົບ')+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ====== STAFF PERFORMANCE ======
+async function loadStaffPerf() {
+  document.getElementById('staffPerfList').innerHTML = '<div class="loading-state">ກຳລັງໂຫຼດ...</div>';
+  try {
+    const res = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getDeliveries', token:adminToken})});
+    const data = await res.json();
+    if (data.status !== 'ok') return;
+    const rows = data.data || [];
+
+    const now = new Date();
+    const todayRows = rows.filter(r => {
+      const days = getDaysFromDate(r.date);
+      return days === 0;
+    });
+
+    const staffCount = {};
+    todayRows.forEach(r => {
+      const name = r.staff || 'ບໍ່ລະບຸ';
+      staffCount[name] = (staffCount[name] || 0) + 1;
+    });
+
+    const sorted = Object.entries(staffCount).sort((a,b) => b[1]-a[1]);
+    const maxCount = sorted.length ? sorted[0][1] : 1;
+
+    const el = document.getElementById('staffPerfList');
+    if (!sorted.length) { el.innerHTML = '<div class="empty-state">ຍັງບໍ່ມີການຈັດສົ່ງມື້ນີ້</div>'; return; }
+    el.innerHTML = sorted.map(([name, count]) => {
+      const pct = Math.round((count/maxCount)*100);
+      return '<div class="staff-perf-item">'+
+        '<div class="staff-perf-name"><span>👷 '+name+'</span><span class="staff-perf-count">'+count+' ໃບ</span></div>'+
+        '<div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%;"></div></div>'+
+      '</div>';
+    }).join('');
+  } catch(e) {
+    document.getElementById('staffPerfList').innerHTML = '<div class="empty-state">ເກີດຂໍ້ຜິດພາດ</div>';
+  }
+}
+
+// ====== FINANCE ======
+async function loadWithdrawList() {
+  try {
+    const res = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getWithdrawals', token:adminToken})});
+    const data = await res.json();
+    if (data.status !== 'ok') return;
+    allWithdrawals = (data.data || []).reverse();
+
+    const totalWithdrawn = allWithdrawals.reduce((s,w) => s + (w.amount||0), 0);
+    document.getElementById('finWithdrawn').textContent = totalWithdrawn.toLocaleString() + ' ກີບ';
+
+    // Estimate income from delivered cards (FEE setting)
+    const doneCount = allCards.filter(c => c.status && c.status.includes('ຈັດສົ່ງສຳເລັດ')).length;
+    document.getElementById('finIncome').textContent = '~' + (doneCount * 30000).toLocaleString() + ' ກີບ';
+
+    const el = document.getElementById('withdrawList');
+    if (!allWithdrawals.length) { el.innerHTML = '<div class="empty-state">ຍັງບໍ່ມີການຖອນ</div>'; return; }
+    el.innerHTML = allWithdrawals.slice(0,50).map(w =>
+      '<div class="withdraw-history-item">'+
+        '<div class="wh-top"><span style="font-weight:700;font-size:13px;">'+w.to+'</span><span class="wh-date">'+shortDate(w.date)+'</span></div>'+
+        '<div class="wh-detail">💵 '+(w.amount||0).toLocaleString()+' ກີບ · 👤 '+w.by+(w.note?' · 📝 '+w.note:'')+'</div>'+
+      '</div>'
+    ).join('');
+  } catch(e) {}
+}
+
+async function submitWithdraw() {
+  const amount = Number(document.getElementById('wdAmount').value);
+  const to = document.getElementById('wdTo').value.trim();
+  const note = document.getElementById('wdNote').value.trim();
+  if (!amount || amount <= 0) { alert('⚠️ ໃສ່ຈຳນວນເງິນ'); return; }
+  if (!to) { alert('⚠️ ໃສ່ຊື່ຜູ້ຮັບ'); return; }
+
+  const now = new Date();
+  const dateStr = String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
+
+  try {
+    await fetch(APPS, {
+      method:'POST', mode:'no-cors',
+      body: JSON.stringify({action:'withdraw', token:adminToken, date:dateStr, amount, to, by:currentAdmin.name, note})
+    });
+    alert('✅ ບັນທຶກການຖອນສຳເລັດ');
+    document.getElementById('wdAmount').value = '';
+    document.getElementById('wdTo').value = '';
+    document.getElementById('wdNote').value = '';
+    loadWithdrawList();
+  } catch(e) {
+    alert('❌ ເກີດຂໍ້ຜິດພາດ');
+  }
+}
+
+// ====== AUDIT LOG ======
+async function loadAuditLog() {
+  document.getElementById('auditList').innerHTML = '<div class="loading-state">ກຳລັງໂຫຼດ...</div>';
+  try {
+    const url = 'https://docs.google.com/spreadsheets/d/1ab6lfE1_Wlhyq95oOt83Tbzq72mE-sagfQRJ3IVWcjU/gviz/tq?tqx=out:json&sheet=System_Log';
+    const res = await fetch(url);
+    const text = await res.text();
+    const m = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+    if (!m) return;
+    const json = JSON.parse(m[1]);
+    const rows = json.table.rows;
+    allSystemLog = rows.map(r => ({
+      time: r.c[0]?.v || '',
+      user: r.c[1]?.v || '',
+      action: r.c[2]?.v || '',
+      detail: r.c[3]?.v || '',
+      extra: r.c[4]?.v || '',
+    })).filter(r => r.action !== 'SEARCH').reverse();
+    renderAuditLog();
+  } catch(e) {
+    document.getElementById('auditList').innerHTML = '<div class="empty-state">ເກີດຂໍ້ຜິດພາດ</div>';
+  }
+}
+
+function renderAuditLog() {
+  const q = (document.getElementById('auditFilter').value||'').trim().toLowerCase();
+  let data = q ? allSystemLog.filter(r => (r.user+r.action+r.detail).toLowerCase().includes(q)) : allSystemLog;
+  const el = document.getElementById('auditList');
+  if (!data.length) { el.innerHTML = '<div class="empty-state">ບໍ່ມີຂໍ້ມູນ</div>'; return; }
+
+  const iconMap = {
+    'LOGIN': {icon:'🔓', cls:'login'},
+    'LOGIN_FAIL': {icon:'🚫', cls:'fail'},
+    'DELIVERY': {icon:'📦', cls:'delivery'},
+    'PROBLEM': {icon:'⚠️', cls:'problem'},
+    'WITHDRAW': {icon:'💰', cls:'login'},
+  };
+
+  el.innerHTML = data.slice(0,200).map(r => {
+    const conf = iconMap[r.action] || {icon:'📝', cls:'login'};
+    return '<div class="audit-item">'+
+      '<div class="audit-icon '+conf.cls+'">'+conf.icon+'</div>'+
+      '<div class="audit-text">'+
+        '<div class="audit-action">'+r.action+' · '+r.user+'</div>'+
+        '<div class="audit-detail">'+shortDate(r.time)+' '+shortTime(r.time)+(r.detail?' · '+r.detail:'')+(r.extra?' · '+r.extra:'')+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(e=>console.log('SW:',e));
+  });
+}
+</script>
+</body>
+</html>
