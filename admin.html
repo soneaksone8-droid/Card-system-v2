@@ -143,6 +143,8 @@ body{font-family:'Noto Sans Lao',sans-serif;background:var(--light);min-height:1
     <button class="tab-btn" onclick="switchTab('search')">🔍 ການຄົ້ນຫາ</button>
     <button class="tab-btn" onclick="switchTab('staff')">👷 ພະນັກງານ</button>
     <button class="tab-btn" onclick="switchTab('finance')">💰 ການເງິນ</button>
+    <button class="tab-btn" onclick="switchTab('manage')">📋 ຈັດການຂໍ້ມູນ</button>
+    <button class="tab-btn" onclick="switchTab('staffmgmt')">👥 ຈັດການພະນັກງານ</button>
     <button class="tab-btn" onclick="switchTab('audit')">🛡️ Audit Log</button>
   </div>
 
@@ -150,7 +152,10 @@ body{font-family:'Noto Sans Lao',sans-serif;background:var(--light);min-height:1
 
     <!-- OVERVIEW -->
     <div class="tab-panel active" id="tab-overview">
-      <button class="btn-refresh" onclick="loadOverview()">🔄 ໂຫຼດຂໍ້ມູນໃໝ່</button>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button class="btn-refresh" onclick="loadOverview()" style="flex:1;margin-bottom:0;">🔄 ໂຫຼດໃໝ່</button>
+        <button class="btn-refresh" onclick="exportPDFReport()" style="flex:1;margin-bottom:0;background:#059669;">📄 Export PDF</button>
+      </div>
 
       <div class="stats-grid">
         <div class="stat-card blue">
@@ -263,12 +268,9 @@ body{font-family:'Noto Sans Lao',sans-serif;background:var(--light);min-height:1
       <div class="card">
         <div class="card-title">➖ ຖອນເງິນ</div>
         <div class="withdraw-form">
-          <div class="input-row">
-            <label>ປະເພດເງິນ</label>
-            <select id="wdType">
-              <option value="ທ້ອງຖິ່ນ">🏘️ ສ່ວນທ້ອງຖິ່ນ</option>
-              <option value="ສູນກາງ">🏛️ ສ່ວນສູນກາງ</option>
-            </select>
+          <div class="input-row" style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px;margin-bottom:10px;">
+            <div style="font-size:11px;color:#15803d;font-weight:700;">🏘️ ຖອນໄດ້ສະເພາະສ່ວນທ້ອງຖິ່ນເທົ່ານັ້ນ</div>
+            <div style="font-size:18px;font-weight:900;color:#15803d;margin-top:4px;" id="wdAvailable">ຍອດເຫຼືອ: -</div>
           </div>
           <div class="input-row">
             <label>ຈຳນວນ (ກີບ)</label>
@@ -286,6 +288,49 @@ body{font-family:'Noto Sans Lao',sans-serif;background:var(--light);min-height:1
         </div>
         <div class="card-title" style="font-size:12px;">📜 ປະຫວັດການຖອນ</div>
         <div id="withdrawList"><div class="loading-state">ກຳລັງໂຫຼດ...</div></div>
+      </div>
+    </div>
+
+    <!-- MANAGE DATA (Cards CRUD) -->
+    <div class="tab-panel" id="tab-manage">
+      <div class="card">
+        <div class="card-title">📋 ຈັດການຂໍ້ມູນບຸກຄົນ</div>
+        <button class="btn-refresh" onclick="loadManageData()">🔄 ໂຫຼດຂໍ້ມູນໃໝ່</button>
+        <input class="search-bar" type="text" id="manageSearch" placeholder="ຄົ້ນຫາຊື່..." oninput="renderManageData()">
+        <div id="manageDataList"><div class="loading-state">ກົດ "ໂຫຼດຂໍ້ມູນໃໝ່"</div></div>
+      </div>
+    </div>
+
+    <!-- MANAGE STAFF -->
+    <div class="tab-panel" id="tab-staffmgmt">
+      <div class="card">
+        <div class="card-title">➕ ເພີ່ມພະນັກງານໃໝ່</div>
+        <div class="input-row">
+          <label>Username</label>
+          <input type="text" id="newStaffUser" placeholder="username (ຕົວພິມນ້ອຍ)">
+        </div>
+        <div class="input-row">
+          <label>Password</label>
+          <input type="text" id="newStaffPass" placeholder="ລະຫັດຜ່ານ">
+        </div>
+        <div class="input-row">
+          <label>ຊື່-ນາມສະກຸນ</label>
+          <input type="text" id="newStaffName" placeholder="ຊື່ ນາມສະກຸນ">
+        </div>
+        <div class="input-row">
+          <label>ສິດການນຳໃຊ້</label>
+          <select id="newStaffRole">
+            <option value="staff">👷 Staff (ພະນັກງານ)</option>
+            <option value="admin">👑 Admin</option>
+          </select>
+        </div>
+        <button class="btn-withdraw" onclick="addNewStaff()" style="background:linear-gradient(135deg,#059669,#047857);">✅ ເພີ່ມພະນັກງານ</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👥 ລາຍຊື່ພະນັກງານ</div>
+        <button class="btn-refresh" onclick="loadStaffList()">🔄 ໂຫຼດຂໍ້ມູນໃໝ່</button>
+        <div id="staffMgmtList"><div class="loading-state">ກົດ "ໂຫຼດຂໍ້ມູນໃໝ່"</div></div>
       </div>
     </div>
 
@@ -351,7 +396,7 @@ function doLogout() {
 // ====== TABS ======
 function switchTab(t) {
   document.querySelectorAll('.tab-btn').forEach((b,i) => {
-    b.classList.toggle('active', ['overview','search','staff','finance','audit'][i]===t);
+    b.classList.toggle('active', ['overview','search','staff','finance','manage','staffmgmt','audit'][i]===t);
   });
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-'+t).classList.add('active');
@@ -361,6 +406,9 @@ function switchTab(t) {
 async function loadAllInitial() {
   await loadOverview();
   await loadWithdrawList();
+  requestNotificationPermission();
+  startProblemMonitoring();
+  lastProblemCount = allCards.filter(c => c.status && c.status.includes('ບັດມີບັນຫາ')).length;
 }
 
 // ====== OVERVIEW ======
@@ -595,41 +643,45 @@ async function loadWithdrawList() {
     // Total income based on delivered cards
     const doneCount = allCards.filter(c => c.status && c.status.includes('ຈັດສົ່ງສຳເລັດ')).length;
     const totalIncome = doneCount * feePerCard;
-    const totalCenter = doneCount * centerPerCard;
-    const totalLocal = doneCount * localPerCard;
+    const totalCenter = doneCount * centerPerCard;  // ສູນກາງ - ບໍ່ສາມາດຖອນໄດ້
+    const totalLocal = doneCount * localPerCard;     // ທ້ອງຖິ່ນ - ຖອນໄດ້ເທົ່ານັ້ນ
 
-    // Withdrawn split by type (from note field containing ສູນກາງ/ທ້ອງຖິ່ນ)
-    const centerWithdrawn = allWithdrawals.filter(w => (w.note||'').includes('ສູນກາງ')).reduce((s,w)=>s+(w.amount||0),0);
-    const localWithdrawn = allWithdrawals.filter(w => (w.note||'').includes('ທ້ອງຖິ່ນ')).reduce((s,w)=>s+(w.amount||0),0);
+    // ທຸກການຖອນແມ່ນຖອນຈາກ ທ້ອງຖິ່ນ ເທົ່ານັ້ນ
     const totalWithdrawn = allWithdrawals.reduce((s,w) => s + (w.amount||0), 0);
-    const remaining = totalIncome - totalWithdrawn;
+    const localRemaining = totalLocal - totalWithdrawn; // ຍອດທ້ອງຖິ່ນທີ່ຍັງຖອນໄດ້
 
     document.getElementById('finIncome').textContent = totalIncome.toLocaleString() + ' ກີບ';
-    document.getElementById('finCenter').textContent = (totalCenter - centerWithdrawn).toLocaleString() + ' ກີບ';
-    document.getElementById('finLocal').textContent = (totalLocal - localWithdrawn).toLocaleString() + ' ກີບ';
+    document.getElementById('finCenter').textContent = totalCenter.toLocaleString() + ' ກີບ';
+    document.getElementById('finLocal').textContent = totalLocal.toLocaleString() + ' ກີບ';
     document.getElementById('finWithdrawn').textContent = totalWithdrawn.toLocaleString() + ' ກີບ';
-    document.getElementById('finRemaining').textContent = remaining.toLocaleString() + ' ກີບ';
+    document.getElementById('finRemaining').textContent = localRemaining.toLocaleString() + ' ກີບ';
+    document.getElementById('wdAvailable').textContent = 'ຍອດເຫຼືອ: ' + localRemaining.toLocaleString() + ' ກີບ';
 
     const el = document.getElementById('withdrawList');
     if (!allWithdrawals.length) { el.innerHTML = '<div class="empty-state">ຍັງບໍ່ມີການຖອນ</div>'; return; }
-    el.innerHTML = allWithdrawals.slice(0,50).map(w => {
-      const typeIcon = (w.note||'').includes('ສູນກາງ') ? '🏛️' : (w.note||'').includes('ທ້ອງຖິ່ນ') ? '🏘️' : '💵';
-      return '<div class="withdraw-history-item">'+
-        '<div class="wh-top"><span style="font-weight:700;font-size:13px;">'+typeIcon+' '+w.to+'</span><span class="wh-date">'+shortDate(w.date)+'</span></div>'+
+    el.innerHTML = allWithdrawals.slice(0,50).map(w =>
+      '<div class="withdraw-history-item">'+
+        '<div class="wh-top"><span style="font-weight:700;font-size:13px;">🏘️ '+w.to+'</span><span class="wh-date">'+shortDate(w.date)+'</span></div>'+
         '<div class="wh-detail">💵 '+(w.amount||0).toLocaleString()+' ກີບ · 👤 '+w.by+(w.note?' · 📝 '+w.note:'')+'</div>'+
-      '</div>';
-    }).join('');
+      '</div>'
+    ).join('');
   } catch(e) { console.error(e); }
 }
 
 async function submitWithdraw() {
   const amount = Number(document.getElementById('wdAmount').value);
   const to = document.getElementById('wdTo').value.trim();
-  const wdType = document.getElementById('wdType').value;
-  const noteRaw = document.getElementById('wdNote').value.trim();
-  const note = '['+wdType+']' + (noteRaw ? ' '+noteRaw : '');
+  const note = document.getElementById('wdNote').value.trim();
   if (!amount || amount <= 0) { alert('⚠️ ໃສ່ຈຳນວນເງິນ'); return; }
   if (!to) { alert('⚠️ ໃສ່ຊື່ຜູ້ຮັບ'); return; }
+
+  // Check against local remaining
+  const availText = document.getElementById('wdAvailable').textContent;
+  const availAmount = Number(availText.replace(/[^0-9]/g, '')) || 0;
+  if (amount > availAmount) {
+    alert('❌ ຈຳນວນເງິນເກີນຍອດທ້ອງຖິ່ນທີ່ມີ!\nຍອດເຫຼືອ: '+availAmount.toLocaleString()+' ກີບ');
+    return;
+  }
 
   const now = new Date();
   const dateStr = String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
@@ -691,6 +743,329 @@ function renderAuditLog() {
     '</div>';
   }).join('');
 }
+
+// ====== EXPORT PDF REPORT (Print to PDF) ======
+function exportPDFReport() {
+  const now = new Date();
+  const dateStr = String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
+  const timeStr = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+
+  const total = document.getElementById('ovTotal').textContent;
+  const done = document.getElementById('ovDone').textContent;
+  const pending = document.getElementById('ovPending').textContent;
+  const problem = document.getElementById('ovProblem').textContent;
+  const c60 = document.getElementById('ov60').textContent;
+  const c30 = document.getElementById('ov30').textContent;
+  const searchToday = document.getElementById('ovSearchToday').textContent;
+  const searchFound = document.getElementById('ovSearchFound').textContent;
+
+  const finIncome = document.getElementById('finIncome')?.textContent || '-';
+  const finCenter = document.getElementById('finCenter')?.textContent || '-';
+  const finLocal = document.getElementById('finLocal')?.textContent || '-';
+  const finWithdrawn = document.getElementById('finWithdrawn')?.textContent || '-';
+  const finRemaining = document.getElementById('finRemaining')?.textContent || '-';
+
+  const win = window.open('', '_blank');
+  win.document.write(`
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<title>ລາຍງານ ${dateStr}</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans Lao',sans-serif;padding:40px;color:#1f2937;}
+.header{text-align:center;border-bottom:3px solid #7f1d1d;padding-bottom:16px;margin-bottom:24px;}
+.header h1{color:#7f1d1d;font-size:22px;margin-bottom:4px;}
+.header p{color:#6b7280;font-size:13px;}
+.meta{display:flex;justify-content:space-between;margin-bottom:24px;font-size:12px;color:#6b7280;}
+.section{margin-bottom:24px;}
+.section-title{font-size:15px;font-weight:700;color:#7f1d1d;border-left:4px solid #7f1d1d;padding-left:10px;margin-bottom:12px;}
+table{width:100%;border-collapse:collapse;margin-bottom:16px;}
+th,td{border:1px solid #e5e7eb;padding:10px 12px;text-align:left;font-size:13px;}
+th{background:#fef2f2;color:#7f1d1d;font-weight:700;}
+.stat-row{display:flex;gap:12px;margin-bottom:16px;}
+.stat-box{flex:1;border:1px solid #e5e7eb;border-radius:8px;padding:14px;text-align:center;}
+.stat-num{font-size:24px;font-weight:900;color:#7f1d1d;}
+.stat-lbl{font-size:11px;color:#6b7280;margin-top:4px;}
+.footer{margin-top:40px;text-align:center;font-size:11px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:16px;}
+@media print{body{padding:20px;}}
+</style></head>
+<body>
+<div class="header">
+  <h1>📊 ລາຍງານສະຫຼຸບລະບົບຈັດສົ່ງບັດ</h1>
+  <p>ກອງບັນຊາການ ປກສ ເມືອງເຊບັ້ງໄຟ ແຂວງຄຳມ່ວນ</p>
+</div>
+<div class="meta">
+  <span>📅 ວັນທີອອກລາຍງານ: ${dateStr} ${timeStr}</span>
+  <span>👤 ອອກໂດຍ: ${currentAdmin?.name || '-'}</span>
+</div>
+
+<div class="section">
+  <div class="section-title">📋 ສະຖານະບັດ</div>
+  <div class="stat-row">
+    <div class="stat-box"><div class="stat-num">${total}</div><div class="stat-lbl">ບັດທັງໝົດ</div></div>
+    <div class="stat-box"><div class="stat-num">${done}</div><div class="stat-lbl">ຈັດສົ່ງສຳເລັດ</div></div>
+    <div class="stat-box"><div class="stat-num">${pending}</div><div class="stat-lbl">ລໍຖ້າຈັດສົ່ງ</div></div>
+    <div class="stat-box"><div class="stat-num">${problem}</div><div class="stat-lbl">ມີບັນຫາ</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🚨 ບັດຄ້າງດົນ</div>
+  <table>
+    <tr><th>ລະດັບ</th><th>ຈຳນວນ</th></tr>
+    <tr><td>🔴 ຄ້າງ &gt; 60 ວັນ</td><td>${c60} ໃບ</td></tr>
+    <tr><td>🟠 ຄ້າງ &gt; 30 ວັນ</td><td>${c30} ໃບ</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <div class="section-title">🔍 ການຄົ້ນຫາສາທາລະນະ (ມື້ນີ້)</div>
+  <table>
+    <tr><th>ລາຍການ</th><th>ຈຳນວນ</th></tr>
+    <tr><td>ຄົ້ນຫາທັງໝົດ</td><td>${searchToday} ຄັ້ງ</td></tr>
+    <tr><td>ພົບຂໍ້ມູນ</td><td>${searchFound} ຄັ້ງ</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <div class="section-title">💰 ສະຫຼຸບການເງິນ</div>
+  <table>
+    <tr><th>ລາຍການ</th><th>ຈຳນວນ</th></tr>
+    <tr><td>ລາຍຮັບລວມ</td><td>${finIncome}</td></tr>
+    <tr><td>🏛️ ສ່ວນສູນກາງ</td><td>${finCenter}</td></tr>
+    <tr><td>🏘️ ສ່ວນທ້ອງຖິ່ນ</td><td>${finLocal}</td></tr>
+    <tr><td>➖ ຖອນແລ້ວ</td><td>${finWithdrawn}</td></tr>
+    <tr><td><strong>💵 ເຫຼືອຈິງ (ທ້ອງຖິ່ນ)</strong></td><td><strong>${finRemaining}</strong></td></tr>
+  </table>
+</div>
+
+<div class="footer">
+  ສ້າງໂດຍລະບົບອັດຕະໂນມັດ — ລະບົບຈັດສົ່ງບັດປະຈຳຕົວດີຈິຕ້ອນ ປກສ ເມືອງເຊບັ້ງໄຟ
+</div>
+<scri" + "pt>window.onload = () => window.print();</scri" + "pt>
+</body></html>
+  `);
+  win.document.close();
+}
+
+// ====== MANAGE DATA (CRUD for Cards) ======
+let manageDataCache = [];
+
+async function loadManageData() {
+  document.getElementById('manageDataList').innerHTML = '<div class="loading-state">ກຳລັງໂຫຼດ...</div>';
+  try {
+    const res = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getCards', token:adminToken})});
+    const data = await res.json();
+    if (data.status !== 'ok') return;
+    manageDataCache = data.data || [];
+    renderManageData();
+  } catch(e) {
+    document.getElementById('manageDataList').innerHTML = '<div class="empty-state">ເກີດຂໍ້ຜິດພາດ</div>';
+  }
+}
+
+function renderManageData() {
+  const q = (document.getElementById('manageSearch').value||'').trim().toLowerCase();
+  let data = q ? manageDataCache.filter(c => (c.firstName+' '+c.lastName).toLowerCase().includes(q)) : manageDataCache;
+  const el = document.getElementById('manageDataList');
+  if (!data.length) { el.innerHTML = '<div class="empty-state">ບໍ່ມີຂໍ້ມູນ</div>'; return; }
+  el.innerHTML = data.slice(0,100).map((c,idx) => {
+    const realIdx = manageDataCache.indexOf(c);
+    return '<div class="audit-item" style="align-items:flex-start;">'+
+      '<div class="audit-icon login">👤</div>'+
+      '<div class="audit-text" style="flex:1;">'+
+        '<div class="audit-action">'+c.firstName+' '+c.lastName+'</div>'+
+        '<div class="audit-detail">🎂 '+(c.dob||'-')+' · 📌 '+c.status+'</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:4px;">'+
+        '<button onclick="editCardData('+realIdx+')" style="background:#eff6ff;color:#1d4ed8;border:none;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;">✏️</button>'+
+        '<button onclick="deleteCardData('+realIdx+')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;">🗑️</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+async function editCardData(idx) {
+  const c = manageDataCache[idx];
+  if (!c) return;
+  const newFn = prompt('ຊື່:', c.firstName);
+  if (newFn === null) return;
+  const newLn = prompt('ນາມສະກຸນ:', c.lastName);
+  if (newLn === null) return;
+  const newDob = prompt('ວັນເດືອນປີເກີດ (DD/MM/YYYY):', c.dob || '');
+  if (newDob === null) return;
+
+  try {
+    await fetch(APPS, {
+      method:'POST', mode:'no-cors',
+      body: JSON.stringify({
+        action:'editCard', token:adminToken,
+        oldFirstName: c.firstName, oldLastName: c.lastName, oldDob: c.dob,
+        firstName: newFn.trim(), lastName: newLn.trim(), dob: newDob.trim()
+      })
+    });
+    alert('✅ ແກ້ໄຂສຳເລັດ');
+    loadManageData();
+  } catch(e) {
+    alert('❌ ເກີດຂໍ້ຜິດພາດ');
+  }
+}
+
+async function deleteCardData(idx) {
+  const c = manageDataCache[idx];
+  if (!c) return;
+  if (!confirm('🗑️ ລຶບ '+c.firstName+' '+c.lastName+' ອອກຈາກລະບົບ?\\nການກະທຳນີ້ບໍ່ສາມາດກູ້ຄືນໄດ້!')) return;
+
+  try {
+    await fetch(APPS, {
+      method:'POST', mode:'no-cors',
+      body: JSON.stringify({
+        action:'deleteCard', token:adminToken,
+        firstName: c.firstName, lastName: c.lastName, dob: c.dob
+      })
+    });
+    alert('✅ ລຶບສຳເລັດ');
+    loadManageData();
+  } catch(e) {
+    alert('❌ ເກີດຂໍ້ຜິດພາດ');
+  }
+}
+
+// ====== MANAGE STAFF ======
+let staffListCache = [];
+
+async function addNewStaff() {
+  const username = document.getElementById('newStaffUser').value.trim();
+  const password = document.getElementById('newStaffPass').value.trim();
+  const name = document.getElementById('newStaffName').value.trim();
+  const role = document.getElementById('newStaffRole').value;
+
+  if (!username || !password || !name) { alert('⚠️ ກະລຸນາໃສ່ຂໍ້ມູນໃຫ້ຄົບ'); return; }
+
+  try {
+    await fetch(APPS, {
+      method:'POST', mode:'no-cors',
+      body: JSON.stringify({action:'addStaff', token:adminToken, username, password, name, role})
+    });
+    alert('✅ ເພີ່ມພະນັກງານສຳເລັດ');
+    document.getElementById('newStaffUser').value = '';
+    document.getElementById('newStaffPass').value = '';
+    document.getElementById('newStaffName').value = '';
+    loadStaffList();
+  } catch(e) {
+    alert('❌ ເກີດຂໍ້ຜິດພາດ');
+  }
+}
+
+async function loadStaffList() {
+  document.getElementById('staffMgmtList').innerHTML = '<div class="loading-state">ກຳລັງໂຫຼດ...</div>';
+  try {
+    const res = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getStaffList', token:adminToken})});
+    const data = await res.json();
+    if (data.status !== 'ok') { document.getElementById('staffMgmtList').innerHTML = '<div class="empty-state">ບໍ່ມີຂໍ້ມູນ</div>'; return; }
+    staffListCache = data.data || [];
+    renderStaffList();
+  } catch(e) {
+    document.getElementById('staffMgmtList').innerHTML = '<div class="empty-state">ເກີດຂໍ້ຜິດພາດ</div>';
+  }
+}
+
+function renderStaffList() {
+  const el = document.getElementById('staffMgmtList');
+  if (!staffListCache.length) { el.innerHTML = '<div class="empty-state">ບໍ່ມີພະນັກງານ</div>'; return; }
+  el.innerHTML = staffListCache.map((s, idx) => {
+    const isActive = (s.status||'').includes('ເຮັດວຽກ');
+    const roleIcon = s.role === 'admin' ? '👑' : '👷';
+    return '<div class="audit-item">'+
+      '<div class="audit-icon '+(isActive?'login':'fail')+'">'+roleIcon+'</div>'+
+      '<div class="audit-text">'+
+        '<div class="audit-action">'+s.name+' ('+s.username+')</div>'+
+        '<div class="audit-detail">'+s.role+' · '+(isActive?'✅ ເຮັດວຽກ':'⛔ ປິດໃຊ້ງານ')+'</div>'+
+      '</div>'+
+      '<button onclick="toggleStaffStatus('+idx+')" style="background:'+(isActive?'#fee2e2':'#f0fdf4')+';color:'+(isActive?'#dc2626':'#15803d')+';border:none;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">'+(isActive?'ປິດ':'ເປີດ')+'</button>'+
+    '</div>';
+  }).join('');
+}
+
+async function toggleStaffStatus(idx) {
+  const s = staffListCache[idx];
+  if (!s) return;
+  const newStatus = (s.status||'').includes('ເຮັດວຽກ') ? 'ປິດໃຊ້ງານ' : 'ເຮັດວຽກ';
+  if (!confirm((newStatus==='ເຮັດວຽກ'?'ເປີດ':'ປິດ')+'ໃຊ້ງານ '+s.name+'?')) return;
+
+  try {
+    await fetch(APPS, {
+      method:'POST', mode:'no-cors',
+      body: JSON.stringify({action:'updateStaffStatus', token:adminToken, username:s.username, status:newStatus})
+    });
+    alert('✅ ອັບເດດສຳເລັດ');
+    loadStaffList();
+  } catch(e) {
+    alert('❌ ເກີດຂໍ້ຜິດພາດ');
+  }
+}
+
+// ====== NOTIFICATION FOR PROBLEMS ======
+let lastProblemCount = 0;
+
+async function checkNewProblems() {
+  try {
+    const problemCount = allCards.filter(c => c.status && c.status.includes('ບັດມີບັນຫາ')).length;
+    if (lastProblemCount > 0 && problemCount > lastProblemCount) {
+      const diff = problemCount - lastProblemCount;
+      // Browser notification
+      if (Notification.permission === 'granted') {
+        new Notification('⚠️ ມີບັດບັນຫາໃໝ່!', {
+          body: 'ມີບັດມີບັນຫາໃໝ່ ' + diff + ' ໃບ ກະລຸນາກວດສອບ',
+          icon: 'logo.png'
+        });
+      }
+      // Sound alert
+      playAlertSound();
+    }
+    lastProblemCount = problemCount;
+  } catch(e) {}
+}
+
+function playAlertSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [[800,0],[600,0.15],[800,0.3]].forEach(([freq,delay]) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq; o.type = 'square';
+      g.gain.setValueAtTime(0.3, ctx.currentTime+delay);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+delay+0.2);
+      o.start(ctx.currentTime+delay); o.stop(ctx.currentTime+delay+0.2);
+    });
+  } catch(e) {}
+}
+
+// Request notification permission on login
+function requestNotificationPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+// Auto-check for new problems every 60 seconds
+let problemCheckInterval = null;
+function startProblemMonitoring() {
+  if (problemCheckInterval) clearInterval(problemCheckInterval);
+  problemCheckInterval = setInterval(async () => {
+    try {
+      const res = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getCards', token:adminToken})});
+      const data = await res.json();
+      if (data.status === 'ok') {
+        allCards = data.data || [];
+        checkNewProblems();
+      }
+    } catch(e) {}
+  }, 60000);
+}
+
 </script>
 
 <script>
