@@ -232,14 +232,30 @@ body{font-family:'Noto Sans Lao',sans-serif;background:var(--light);min-height:1
     <div class="tab-panel" id="tab-finance">
       <div class="card">
         <div class="card-title">💰 ສະຫຼຸບການເງິນ</div>
+        <div class="finance-summary" style="grid-template-columns:1fr;">
+          <div class="finance-box">
+            <div class="finance-box-label">💰 ລາຍຮັບລວມທັງໝົດ</div>
+            <div class="finance-box-val" id="finIncome" style="font-size:22px;">-</div>
+          </div>
+        </div>
+        <div class="finance-summary">
+          <div class="finance-box" style="border-color:#fbbf24;background:#fffbeb;">
+            <div class="finance-box-label">🏛️ ສ່ວນສູນກາງ</div>
+            <div class="finance-box-val" id="finCenter" style="color:#b45309;">-</div>
+          </div>
+          <div class="finance-box" style="border-color:#86efac;background:#f0fdf4;">
+            <div class="finance-box-label">🏘️ ສ່ວນທ້ອງຖິ່ນ</div>
+            <div class="finance-box-val" id="finLocal" style="color:#15803d;">-</div>
+          </div>
+        </div>
         <div class="finance-summary">
           <div class="finance-box">
-            <div class="finance-box-label">ລາຍຮັບລວມ</div>
-            <div class="finance-box-val" id="finIncome">-</div>
+            <div class="finance-box-label">➖ ຖອນແລ້ວທັງໝົດ</div>
+            <div class="finance-box-val" id="finWithdrawn" style="color:#dc2626;">-</div>
           </div>
-          <div class="finance-box">
-            <div class="finance-box-label">ຖອນແລ້ວ</div>
-            <div class="finance-box-val" id="finWithdrawn">-</div>
+          <div class="finance-box" style="border-color:#93c5fd;background:#eff6ff;">
+            <div class="finance-box-label">💵 ເງິນເຫຼືອຕົວຈິງ</div>
+            <div class="finance-box-val" id="finRemaining" style="color:#1d4ed8;">-</div>
           </div>
         </div>
       </div>
@@ -247,6 +263,13 @@ body{font-family:'Noto Sans Lao',sans-serif;background:var(--light);min-height:1
       <div class="card">
         <div class="card-title">➖ ຖອນເງິນ</div>
         <div class="withdraw-form">
+          <div class="input-row">
+            <label>ປະເພດເງິນ</label>
+            <select id="wdType">
+              <option value="ທ້ອງຖິ່ນ">🏘️ ສ່ວນທ້ອງຖິ່ນ</option>
+              <option value="ສູນກາງ">🏛️ ສ່ວນສູນກາງ</option>
+            </select>
+          </div>
           <div class="input-row">
             <label>ຈຳນວນ (ກີບ)</label>
             <input type="number" id="wdAmount" placeholder="0">
@@ -484,23 +507,16 @@ async function loadSearchStats() {
 async function loadSearchLog() {
   document.getElementById('searchLogList').innerHTML = '<div class="loading-state">ກຳລັງໂຫຼດ...</div>';
   try {
-    const url = 'https://docs.google.com/spreadsheets/d/1ab6lfE1_Wlhyq95oOt83Tbzq72mE-sagfQRJ3IVWcjU/gviz/tq?tqx=out:json&sheet=System_Log';
-    const res = await fetch(url);
-    const text = await res.text();
-    const m = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
-    if (!m) { document.getElementById('searchLogList').innerHTML = '<div class="empty-state">ບໍ່ມີຂໍ້ມູນ</div>'; return; }
-    const json = JSON.parse(m[1]);
-    const rows = json.table.rows;
-    allSystemLog = rows.map(r => ({
-      time: r.c[0]?.v || '',
-      user: r.c[1]?.v || '',
-      action: r.c[2]?.v || '',
-      detail: r.c[3]?.v || '',
-      extra: r.c[4]?.v || '',
-    })).filter(r => r.action === 'SEARCH').reverse();
+    const res = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getSystemLog', token:adminToken})});
+    const data = await res.json();
+    if (data.status !== 'ok') {
+      document.getElementById('searchLogList').innerHTML = '<div class="empty-state">ບໍ່ມີຂໍ້ມູນ</div>';
+      return;
+    }
+    allSystemLog = (data.data || []).filter(r => r.action === 'SEARCH');
     renderSearchLog();
   } catch(e) {
-    document.getElementById('searchLogList').innerHTML = '<div class="empty-state">ເກີດຂໍ້ຜິດພາດ</div>';
+    document.getElementById('searchLogList').innerHTML = '<div class="empty-state">ເກີດຂໍ້ຜິດພາດ: '+e.message+'</div>';
   }
 }
 
@@ -511,8 +527,9 @@ function renderSearchLog() {
   if (!data.length) { el.innerHTML = '<div class="empty-state">ບໍ່ມີຂໍ້ມູນການຄົ້ນຫາ</div>'; return; }
   el.innerHTML = data.slice(0, 200).map(r => {
     const found = r.extra === 'FOUND';
-    const timeStr = shortTime(r.time);
-    const dateStr = shortDate(r.time);
+    const parts = (r.time||'').split(' ');
+    const dateStr = parts[0] || '-';
+    const timeStr = parts[1] || '';
     return '<div class="search-log-item '+(found?'found':'notfound')+'">'+
       '<div class="sl-time">'+timeStr+'<br><span style="font-size:8px;">'+dateStr+'</span></div>'+
       '<div class="sl-name">🔍 '+(r.detail||'-')+'</div>'+
@@ -562,33 +579,55 @@ async function loadStaffPerf() {
 // ====== FINANCE ======
 async function loadWithdrawList() {
   try {
+    // Get Settings for FEE/CENTER/LOCAL split
+    const sres = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getSettings', token:adminToken})});
+    const sdata = await sres.json();
+    const settings = (sdata.status === 'ok') ? sdata.data : {};
+    const feePerCard = Number(settings.FEE || 30000);
+    const centerPerCard = Number(settings.CENTER || 20000);
+    const localPerCard = Number(settings.LOCAL || 10000);
+
     const res = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getWithdrawals', token:adminToken})});
     const data = await res.json();
     if (data.status !== 'ok') return;
     allWithdrawals = (data.data || []).reverse();
 
-    const totalWithdrawn = allWithdrawals.reduce((s,w) => s + (w.amount||0), 0);
-    document.getElementById('finWithdrawn').textContent = totalWithdrawn.toLocaleString() + ' ກີບ';
-
-    // Estimate income from delivered cards (FEE setting)
+    // Total income based on delivered cards
     const doneCount = allCards.filter(c => c.status && c.status.includes('ຈັດສົ່ງສຳເລັດ')).length;
-    document.getElementById('finIncome').textContent = '~' + (doneCount * 30000).toLocaleString() + ' ກີບ';
+    const totalIncome = doneCount * feePerCard;
+    const totalCenter = doneCount * centerPerCard;
+    const totalLocal = doneCount * localPerCard;
+
+    // Withdrawn split by type (from note field containing ສູນກາງ/ທ້ອງຖິ່ນ)
+    const centerWithdrawn = allWithdrawals.filter(w => (w.note||'').includes('ສູນກາງ')).reduce((s,w)=>s+(w.amount||0),0);
+    const localWithdrawn = allWithdrawals.filter(w => (w.note||'').includes('ທ້ອງຖິ່ນ')).reduce((s,w)=>s+(w.amount||0),0);
+    const totalWithdrawn = allWithdrawals.reduce((s,w) => s + (w.amount||0), 0);
+    const remaining = totalIncome - totalWithdrawn;
+
+    document.getElementById('finIncome').textContent = totalIncome.toLocaleString() + ' ກີບ';
+    document.getElementById('finCenter').textContent = (totalCenter - centerWithdrawn).toLocaleString() + ' ກີບ';
+    document.getElementById('finLocal').textContent = (totalLocal - localWithdrawn).toLocaleString() + ' ກີບ';
+    document.getElementById('finWithdrawn').textContent = totalWithdrawn.toLocaleString() + ' ກີບ';
+    document.getElementById('finRemaining').textContent = remaining.toLocaleString() + ' ກີບ';
 
     const el = document.getElementById('withdrawList');
     if (!allWithdrawals.length) { el.innerHTML = '<div class="empty-state">ຍັງບໍ່ມີການຖອນ</div>'; return; }
-    el.innerHTML = allWithdrawals.slice(0,50).map(w =>
-      '<div class="withdraw-history-item">'+
-        '<div class="wh-top"><span style="font-weight:700;font-size:13px;">'+w.to+'</span><span class="wh-date">'+shortDate(w.date)+'</span></div>'+
+    el.innerHTML = allWithdrawals.slice(0,50).map(w => {
+      const typeIcon = (w.note||'').includes('ສູນກາງ') ? '🏛️' : (w.note||'').includes('ທ້ອງຖິ່ນ') ? '🏘️' : '💵';
+      return '<div class="withdraw-history-item">'+
+        '<div class="wh-top"><span style="font-weight:700;font-size:13px;">'+typeIcon+' '+w.to+'</span><span class="wh-date">'+shortDate(w.date)+'</span></div>'+
         '<div class="wh-detail">💵 '+(w.amount||0).toLocaleString()+' ກີບ · 👤 '+w.by+(w.note?' · 📝 '+w.note:'')+'</div>'+
-      '</div>'
-    ).join('');
-  } catch(e) {}
+      '</div>';
+    }).join('');
+  } catch(e) { console.error(e); }
 }
 
 async function submitWithdraw() {
   const amount = Number(document.getElementById('wdAmount').value);
   const to = document.getElementById('wdTo').value.trim();
-  const note = document.getElementById('wdNote').value.trim();
+  const wdType = document.getElementById('wdType').value;
+  const noteRaw = document.getElementById('wdNote').value.trim();
+  const note = '['+wdType+']' + (noteRaw ? ' '+noteRaw : '');
   if (!amount || amount <= 0) { alert('⚠️ ໃສ່ຈຳນວນເງິນ'); return; }
   if (!to) { alert('⚠️ ໃສ່ຊື່ຜູ້ຮັບ'); return; }
 
@@ -614,23 +653,16 @@ async function submitWithdraw() {
 async function loadAuditLog() {
   document.getElementById('auditList').innerHTML = '<div class="loading-state">ກຳລັງໂຫຼດ...</div>';
   try {
-    const url = 'https://docs.google.com/spreadsheets/d/1ab6lfE1_Wlhyq95oOt83Tbzq72mE-sagfQRJ3IVWcjU/gviz/tq?tqx=out:json&sheet=System_Log';
-    const res = await fetch(url);
-    const text = await res.text();
-    const m = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
-    if (!m) return;
-    const json = JSON.parse(m[1]);
-    const rows = json.table.rows;
-    allSystemLog = rows.map(r => ({
-      time: r.c[0]?.v || '',
-      user: r.c[1]?.v || '',
-      action: r.c[2]?.v || '',
-      detail: r.c[3]?.v || '',
-      extra: r.c[4]?.v || '',
-    })).filter(r => r.action !== 'SEARCH').reverse();
+    const res = await fetch(APPS, {method:'POST', body: JSON.stringify({action:'getSystemLog', token:adminToken})});
+    const data = await res.json();
+    if (data.status !== 'ok') {
+      document.getElementById('auditList').innerHTML = '<div class="empty-state">ບໍ່ມີຂໍ້ມູນ</div>';
+      return;
+    }
+    allSystemLog = (data.data || []).filter(r => r.action !== 'SEARCH');
     renderAuditLog();
   } catch(e) {
-    document.getElementById('auditList').innerHTML = '<div class="empty-state">ເກີດຂໍ້ຜິດພາດ</div>';
+    document.getElementById('auditList').innerHTML = '<div class="empty-state">ເກີດຂໍ້ຜິດພາດ: '+e.message+'</div>';
   }
 }
 
@@ -654,7 +686,7 @@ function renderAuditLog() {
       '<div class="audit-icon '+conf.cls+'">'+conf.icon+'</div>'+
       '<div class="audit-text">'+
         '<div class="audit-action">'+r.action+' · '+r.user+'</div>'+
-        '<div class="audit-detail">'+shortDate(r.time)+' '+shortTime(r.time)+(r.detail?' · '+r.detail:'')+(r.extra?' · '+r.extra:'')+'</div>'+
+        '<div class="audit-detail">'+(r.time||'-')+(r.detail?' · '+r.detail:'')+(r.extra?' · '+r.extra:'')+'</div>'+
       '</div>'+
     '</div>';
   }).join('');
