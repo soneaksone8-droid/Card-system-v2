@@ -85,12 +85,12 @@ body{font-family:'Noto Sans Lao',sans-serif;background:linear-gradient(160deg,#0
     <div class="card-title">🔍 ກວດສອບສະຖານະບັດ</div>
     <div class="input-group">
       <label>ຊື່ <span>*</span></label>
-      <input type="text" id="firstName" placeholder="ພິມຊື່..." oninput="clearErr('fnErr')" onblur="applyNorm('firstName')">
+      <input type="text" id="firstName" placeholder="ພິມຊື່ເປັນພາສາລາວ..." oninput="clearErr('fnErr');checkEnglishInput(this)" onblur="applyNorm('firstName')">
       <div class="err-msg" id="fnErr">⚠️ ກະລຸນາພິມຊື່</div>
     </div>
     <div class="input-group">
       <label>ນາມສະກຸນ <span>*</span></label>
-      <input type="text" id="lastName" placeholder="ພິມນາມສະກຸນ..." oninput="clearErr('lnErr')" onblur="applyNorm('lastName')">
+      <input type="text" id="lastName" placeholder="ພິມນາມສະກຸນເປັນພາສາລາວ..." oninput="clearErr('lnErr');checkEnglishInput(this)" onblur="applyNorm('lastName')">
       <div class="err-msg" id="lnErr">⚠️ ກະລຸນາພິມນາມສະກຸນ</div>
     </div>
     <button class="btn" id="searchBtn" onclick="doSearch()">
@@ -129,13 +129,33 @@ const CLIENT_ID = 'pub_' + Math.random().toString(36).substr(2,9);
 
 function normalize(t) {
   if (!t) return '';
-  t = t.trim().replace(/^(ທ້າວ|ນາງສາວ|ນາງ|ທ\.?)\s*/u, '');
+  t = t.trim();
+  // ລຶບຄຳນຳໜ້າຫຼາຍຮູບແບບ
+  t = t.replace(/^(ທ້າວ|ນາງສາວ|ນາງ|ນ\.|ທ\.|ທ່ານ|ບອກ)\s*/u, '');
+  // ປ່ຽນຮູບແບບສະກົດ
   t = t.replace(/ຫນ/g,'ໜ').replace(/ຫມ/g,'ໝ').replace(/ຫລ/g,'ຫຼ');
+  // ລຶບຊ່ອງຫວ່າງຊ້ຳ
+  t = t.replace(/\s+/g, ' ');
   return t.trim();
+}
+
+// ກວດວ່າມີຕົວອັກສອນພາສາອັງກິດ
+function hasEnglish(t) {
+  return /[a-zA-Z]/.test(t);
 }
 
 function applyNorm(id) {
   document.getElementById(id).value = normalize(document.getElementById(id).value);
+}
+
+function checkEnglishInput(el) {
+  if (hasEnglish(el.value)) {
+    el.style.borderColor = '#d97706';
+    el.style.background = '#fffbeb';
+  } else {
+    el.style.borderColor = '';
+    el.style.background = '';
+  }
 }
 
 function clearErr(id) {
@@ -172,6 +192,13 @@ async function doSearch() {
   let err = false;
   if (!fn) { document.getElementById('fnErr').classList.add('show'); document.getElementById('firstName').classList.add('err'); err=true; }
   if (!ln) { document.getElementById('lnErr').classList.add('show'); document.getElementById('lastName').classList.add('err'); err=true; }
+
+  // ກວດພາສາອັງກິດ
+  if (!err && (hasEnglish(fn) || hasEnglish(ln))) {
+    alert('⚠️ ກະລຸນາພິມເປັນພາສາລາວເທົ່ານັ້ນ\nຕົວຢ່າງ: ສົມໃຈ ພົມມະວົງ');
+    return;
+  }
+
   if (err) return;
 
   document.getElementById('firstName').value = fn;
