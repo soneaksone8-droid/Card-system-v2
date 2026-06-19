@@ -103,14 +103,18 @@ body{font-family:'Noto Sans Lao',sans-serif;background:linear-gradient(160deg,#0
 
   <div class="card">
     <div class="card-title">🔍 ກວດສອບສະຖານະບັດ</div>
+    <div style="background:#f0f7ff;border:1px solid #bfdbfe;border-radius:10px;padding:9px 12px;margin-bottom:16px;font-size:11px;color:#1d4ed8;text-align:center;line-height:1.5;">
+      💡 ພິມຊື່-ນາມສະກຸນ <strong>ໂດຍບໍ່ໃສ່ຄຳນຳໜ້າ</strong><br>
+      ຕົວຢ່າງ: <strong>ສອນໄຊ ແສງຈັນ</strong> (ບໍ່ໃສ່ "ທ້າວ"/"ນາງ")
+    </div>
     <div class="input-group">
       <label>ຊື່ <span>*</span></label>
-      <input type="text" id="firstName" placeholder="ພິມຊື່ເປັນພາສາລາວ..." oninput="clearErr('fnErr');checkEnglishInput(this)" onblur="applyNorm('firstName')">
+      <input type="text" id="firstName" placeholder="ເຊັ່ນ: ສອນໄຊ" oninput="clearErr('fnErr');checkEnglishInput(this)" onblur="applyNorm('firstName')">
       <div class="err-msg" id="fnErr">⚠️ ກະລຸນາພິມຊື່</div>
     </div>
     <div class="input-group">
       <label>ນາມສະກຸນ <span>*</span></label>
-      <input type="text" id="lastName" placeholder="ພິມນາມສະກຸນເປັນພາສາລາວ..." oninput="clearErr('lnErr');checkEnglishInput(this)" onblur="applyNorm('lastName')">
+      <input type="text" id="lastName" placeholder="ເຊັ່ນ: ແສງຈັນ" oninput="clearErr('lnErr');checkEnglishInput(this)" onblur="applyNorm('lastName')">
       <div class="err-msg" id="lnErr">⚠️ ກະລຸນາພິມນາມສະກຸນ</div>
     </div>
     <button class="btn" id="searchBtn" onclick="doSearch()">
